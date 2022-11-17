@@ -1,4 +1,4 @@
-# ALPR on nVIDIA-Jetson-Nano with SoA YOLO on Darknet</p>
+# ALPR on nVIDIA-Jetson-Nano with SoA YOLO in Darknet</p>
 
 ------------
 
