@@ -41,4 +41,59 @@ https://web.inf.ufpr.br/vri/publications/laroca2018robust/
 
 ------------
 
+## Dependencies.
+To run the application, you need to have:
+- A member of the Jetson family, like a Jetson Nano or Xavier.<br>
+- OpenCV 64-bit.
+- Darknet ([the Alexey version](https://github.com/AlexeyAB/darknet))
+- MonoDB, Node.js, JSON for C++.
+- Code::Blocks installed if you want to work with the C++ source. 
+
+### Installing the dependencies.
+Start with some evergreens
+```
+$ sudo apt-get update 
+$ sudo apt-get upgrade
+$ sudo apt-get install curl libcurl4
+$ sudo apt-get install cmake wget
+```
+#### Node.js
+```
+$ curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
+$ sudo apt-get install -y nodejs
+```
+#### MongoDB
+```
+$ sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 9DA31620334BD75D9DCB49F368818C72E52529D4
+$ echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/4.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.0.list
+$ sudo apt-get update
+$ sudo apt-get install -y openssl mongodb-org
+# Start service
+$ sudo systemctl start mongod
+# Enable service on boot
+$ sudo systemctl enable mongod
+```
+#### JSON for C++
+writtenby [Niels Lohmann](https://github.com/nlohmann).
+```
+$ git clone https://github.com/nlohmann/json.git
+$ cd json
+$ mkdir build
+$ cd build
+$ cmake ..
+$ make -j4
+$ sudo make install
+```
+#### OpenCV
+Follow the [guide](https://qengineering.eu/install-opencv-4.5-on-jetson-nano.html).
+#### Darknet
+Follow the [guide](https://qengineering.eu/install-darknet-on-jetson-nano.html).
+#### Code::Blocks
+```
+$ sudo apt-get install codeblocks
+```
+------------
+
+
+
 <>
