@@ -44,10 +44,11 @@ https://web.inf.ufpr.br/vri/publications/laroca2018robust/
 ## Dependencies.
 To run the application, you need to have:
 - A member of the Jetson family, like a Jetson Nano or Xavier.<br>
-- OpenCV 64-bit.
-- Darknet ([the Alexey version](https://github.com/AlexeyAB/darknet))
-- MonoDB, Node.js, JSON for C++.
-- Code::Blocks installed if you want to work with the C++ source. 
+- OpenCV 64-bit installed.
+- Darknet ([the Alexey version](https://github.com/AlexeyAB/darknet)) installed.
+- MonoDB, Node.js and JSON for C++ installed.
+- The darknet models downloaded from Gdrive.
+- Code::Blocks installed, if you like to work with the C++ source. 
 
 ### Installing the dependencies.
 Start with some evergreens
@@ -84,14 +85,18 @@ $ cmake ..
 $ make -j4
 $ sudo make install
 ```
-#### OpenCV
-Follow the [guide](https://qengineering.eu/install-opencv-4.5-on-jetson-nano.html).
-#### Darknet
-Follow the [guide](https://qengineering.eu/install-darknet-on-jetson-nano.html).
 #### Code::Blocks
 ```
 $ sudo apt-get install codeblocks
 ```
+#### OpenCV
+Follow this [guide](https://qengineering.eu/install-opencv-4.5-on-jetson-nano.html).
+#### Darknet
+Follow this [guide](https://qengineering.eu/install-darknet-on-jetson-nano.html).
+#### Darknet models.
+Due to their large size, all darknet models are stored at Gdrive [ALPR_models.zip](https://drive.google.com/file/d/1UCQi0BwtzOgcblaIPGi_V0Yim2yXBHKI/view?usp=share_link).<br>
+After downloading you can unzip and save the models.
+
 ------------
 
 
