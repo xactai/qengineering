@@ -142,7 +142,7 @@ All the required settings are listed in the `config.json` file. Without this fil
   "VERSION": "1.0.0",
   "VIDEO_INPUT": "remote_cam",
   "VIDEO_INPUTS_PARAMS": {
-    "file": "opendatacam_videos/demo.mp4",
+    "file": "./demo.mp4",
     "usbcam": "v4l2src device=/dev/video0 ! video/x-raw, framerate=30/1, width=640, height=360 ! videoconvert ! appsink",
     "raspberrycam": "nvarguscamerasrc ! video/x-raw(memory:NVMM),width=1280, height=720, framerate=30/1, format=NV12 ! nvvidconv ! video/x-raw, format=BGRx, width=640, height=360 ! videoconvert ! video/x-raw, format=BGR ! appsink",
     "remote_cam": "rtsp://192.168.178.129:8554/test/",
