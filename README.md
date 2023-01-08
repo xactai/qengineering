@@ -99,6 +99,47 @@ After downloading you can unzip and save the models in the appropriate folder.
 
 ------------
 
+## Installing the app.
+To extract and run the network in Code::Blocks <br/>
+$ mkdir *MyDir* <br/>
+$ cd *MyDir* <br/>
+$ wget https://github.com/Qengineering/GFPGAN-ncnn-Raspberry-Pi-4/archive/refs/heads/main.zip <br/>
+$ unzip -j master.zip <br/>
+Remove master.zip, LICENSE and README.md as they are no longer needed. <br/> 
+$ rm master.zip <br/>
+$ rm LICENSE <br/>
+$ rm README.md <br/> <br/>
+Your *MyDir* folder must now look like this: <br/> 
+```
+.
+├── models
+│   ├── lp-detection-layout-classification.cfg
+│   ├── lp-detection-layout-classification.data
+│   ├── lp-detection-layout-classification.names
+│   ├── lp-detection-layout-classification.weights
+│   ├── lp-recognition.cfg
+│   ├── lp-recognition.data
+│   ├── lp-recognition.names
+│   ├── lp-recognition.weights
+│   ├── vehicle-detection.cfg
+│   ├── vehicle-detection.data
+│   ├── vehicle-detection.names
+│   └── vehicle-detection.weights
+├── include
+│   ├── Numbers.h
+│   ├── Regression.h
+│   ├── RTSPcam.h
+│   └── Tjson.h
+├── src
+│   ├── main.cpp
+│   ├── Regression.cpp
+│   ├── RTSPcam.cpp
+│   └── Tjson.cpp
+├── config.json
+└── YOLO_ALPR.cbp
+```
+------------
+
 
 
 <>
