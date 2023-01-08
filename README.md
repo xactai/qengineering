@@ -103,12 +103,7 @@ After downloading you can unzip and save the models in the appropriate folder.
 To extract and run the network in Code::Blocks <br/>
 $ mkdir *MyDir* <br/>
 $ cd *MyDir* <br/>
-$ wget https://github.com/Qengineering/GFPGAN-ncnn-Raspberry-Pi-4/archive/refs/heads/main.zip <br/>
-$ unzip -j master.zip <br/>
-Remove master.zip, LICENSE and README.md as they are no longer needed. <br/> 
-$ rm master.zip <br/>
-$ rm LICENSE <br/>
-$ rm README.md <br/> <br/>
+$ git clone https://github.com/xactai/qengineering-01.git <br/>
 Your *MyDir* folder must now look like this: <br/> 
 ```
 .
