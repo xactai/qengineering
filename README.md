@@ -135,6 +135,28 @@ Your *MyDir* folder must now look like this: <br/>
 ```
 ------------
 
-
+## Installing the app.
+All the required settings are listed in the `config.json` file. Without this file, the app will not start.
+```json
+{
+  "VERSION": "1.0.0",
+  "VIDEO_INPUT": "remote_cam",
+  "VIDEO_INPUTS_PARAMS": {
+    "file": "opendatacam_videos/demo.mp4",
+    "usbcam": "v4l2src device=/dev/video0 ! video/x-raw, framerate=30/1, width=640, height=360 ! videoconvert ! appsink",
+    "raspberrycam": "nvarguscamerasrc ! video/x-raw(memory:NVMM),width=1280, height=720, framerate=30/1, format=NV12 ! nvvidconv ! video/x-raw, format=BGRx, width=640, height=360 ! videoconvert ! video/x-raw, format=BGR ! appsink",
+    "remote_cam": "rtsp://192.168.178.129:8554/test/",
+    "remote_hls_gstreamer": "souphttpsrc location=http://YOUR_HLSSTREAM_URL_HERE.m3u8 ! hlsdemux ! decodebin ! videoconvert ! videoscale ! appsink"
+  },
+  "VEHICLE_MODEL": "./models/vehicle-detection",
+  "LICENSE_MODEL": "./models/lp-detection-layout-classification",
+  "OCR_MODEL": "./models/lp-recognition",
+  "PRINT_ON": true
+}
+```
+#### VIDEO_INPUT
+You can connect different video sources to the ALPR app, like a file, a USB cam, a RaspiCam or an RTSP video stream.
+#### VIDEO_INPUTS_PARAMS
+Define your video parameters here. In most cases, you only have to give the correct RTSP address. Please note the commas at the end of the lines.
 
 <>
