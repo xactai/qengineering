@@ -155,7 +155,9 @@ All the required settings are listed in the `config.json` file. Without this fil
 }
 ```
 #### VIDEO_INPUT
-You can connect different video sources to the ALPR app, like a file, a USB cam, a RaspiCam or an RTSP video stream.
+Select your video input. It can be one of the sources listed under `VIDEO_INPUTS_PARAMS`:<br>
+`file, usbcam, raspberrycam, remote_cam or remote_hls_gstreamer`.<br>
+Default choice is an RTSP video stream.
 #### VIDEO_INPUTS_PARAMS
 Define your video parameters here. In most cases, you only have to give the correct RTSP address at `remote_cam`. Please note the commas at the end of the lines.
 
