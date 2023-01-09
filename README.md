@@ -135,8 +135,8 @@ Your *MyDir* folder must now look like this: <br/>
 ```
 ------------
 
-## Installing the app.
-All the required settings are listed in the `config.json` file. Without this file, the app will not start.
+## Config.json.
+All required settings are listed in the `config.json` file. Without this file, the app will not start.
 ```json
 {
   "VERSION": "1.0.0",
