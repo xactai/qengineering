@@ -173,4 +173,9 @@ Each set constist of three files. The topology (.cfg) file, the weights (.weight
 #### PRINT_ON
 When the boolean PRINT_ON is `true`, license plates are printed on the terminal.<br>
 When `false`, the license plates are still detected and sent as JSON string to local port 8070, but are not shown on the terminal window.
-<>
+
+------------
+
+## Running the app.
+Before compiling and running the application, modify the config.json to your situation.<br>
+Once done, load the project file YOLO_ALPR.cbp in Code::Blocks and run <F9>. More info follow the instructions at [Hands-On](https://qengineering.eu/deep-learning-examples-on-raspberry-32-64-os.html#HandsOn).<br/>
