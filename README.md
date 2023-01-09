@@ -166,7 +166,11 @@ Default choice is an RTSP video stream.
 | raspberrycam | The GStreamer pipeline connecting the ALPR to an Raspberry Pi camera (MIPI). |
 | remote_cam | The GStreamer pipeline connecting the ALPR to an RTSP source. |
 | remote_hls_gstreamer | The GStreamer pipeline connecting the ALPR to an HLS source. |
-
-
-
+#### MODEL
+The name and location where the darknet deep learning models can be found.<br>
+You need three sets: one for detecting the vehicle, one for detecting a license plate and one for optical character recognition.<br>
+Each set constist of three files. The topology (.cfg) file, the weights (.weights) file and the labels (.names).
+#### PRINT_ON
+When the boolean PRINT_ON is `true`, license plates are printed on the terminal.<br>
+When `false`, the license plates are still detected and sent as JSON string to local port 8070, but are not shown on the terminal window.
 <>
