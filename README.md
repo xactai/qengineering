@@ -159,6 +159,14 @@ Select your video input. It can be one of the sources listed under `VIDEO_INPUTS
 `file, usbcam, raspberrycam, remote_cam or remote_hls_gstreamer`.<br>
 Default choice is an RTSP video stream.
 #### VIDEO_INPUTS_PARAMS
-Define your video parameters here. In most cases, you only have to give the correct RTSP address at `remote_cam`. Please note the commas at the end of the lines.
+| Item      | Description |
+| --------- | -----|
+| file  | Name and location of the video file. |
+| usbcam  | The GStreamer pipeline connecting the ALPR to an USB camera. |
+| raspberrycam | The GStreamer pipeline connecting the ALPR to an Raspberry Pi camera (MIPI). |
+| remote_cam | The GStreamer pipeline connecting the ALPR to an RTSP source. |
+| remote_hls_gstreamer | The GStreamer pipeline connecting the ALPR to an HLS source. |
+
+
 
 <>
