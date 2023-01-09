@@ -178,4 +178,4 @@ When `false`, the license plates are still detected and sent as JSON string to l
 
 ## Running the app.
 Before compiling and running the application, modify the config.json to your situation.<br>
-Once done, load the project file YOLO_ALPR.cbp in Code::Blocks and run <F9>. More info follow the instructions at [Hands-On](https://qengineering.eu/deep-learning-examples-on-raspberry-32-64-os.html#HandsOn).<br/>
+Once done, load the project file YOLO_ALPR.cbp in Code::Blocks and run `<F9>`. More info follow the instructions at [Hands-On](https://qengineering.eu/deep-learning-examples-on-raspberry-32-64-os.html#HandsOn).<br/>
