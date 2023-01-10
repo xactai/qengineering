@@ -46,7 +46,7 @@ To run the application, you need to have:
 - A member of the Jetson family, like a Jetson Nano or Xavier.<br>
 - OpenCV 64-bit installed.
 - Darknet ([the Alexey version](https://github.com/AlexeyAB/darknet)) installed.
-- MonoDB, Node.js and JSON for C++ installed.
+- MongoDB, Node.js and JSON for C++ installed.
 - The darknet models downloaded from Gdrive.
 - Code::Blocks installed, if you like to work with the C++ source. 
 
@@ -75,7 +75,7 @@ $ sudo systemctl start mongod
 $ sudo systemctl enable mongod
 ```
 #### JSON for C++
-writtenby [Niels Lohmann](https://github.com/nlohmann).
+written by [Niels Lohmann](https://github.com/nlohmann).
 ```
 $ git clone https://github.com/nlohmann/json.git
 $ cd json
