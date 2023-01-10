@@ -6,6 +6,7 @@
 | :------------ | :------------ |
 |**Contact Points**|srikant.jakilinki@xinthe.com|
 |**Approved By**|Sridhar Panuganti (sridhar@xinthe.com)|
+|**Developed By**|Q-Engineering (info@qengineering.eu)|
 |**Status**|External Release|
 |**Distribution List**|Management, QEngineering|
 
