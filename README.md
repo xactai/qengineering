@@ -142,7 +142,8 @@ All required settings are listed in the `config.json` file. Without this file, t
   "VERSION": "1.0.0",
   "VIDEO_INPUT": "remote_cam",
   "VIDEO_INPUTS_PARAMS": {
-    "file": "./demo.mp4",
+    "file": "./car12.jpg",
+    "movie": "./demo.mp4",
     "usbcam": "v4l2src device=/dev/video0 ! video/x-raw, framerate=30/1, width=640, height=360 ! videoconvert ! appsink",
     "raspberrycam": "nvarguscamerasrc ! video/x-raw(memory:NVMM),width=1280, height=720, framerate=30/1, format=NV12 ! nvvidconv ! video/x-raw, format=BGRx, width=640, height=360 ! videoconvert ! video/x-raw, format=BGR ! appsink",
     "remote_cam": "rtsp://192.168.178.129:8554/test/",
@@ -156,12 +157,13 @@ All required settings are listed in the `config.json` file. Without this file, t
 ```
 #### VIDEO_INPUT
 Select your video input. It can be one of the sources listed under `VIDEO_INPUTS_PARAMS`:<br>
-`file, usbcam, raspberrycam, remote_cam or remote_hls_gstreamer`.<br>
+`file, movie, usbcam, raspberrycam, remote_cam or remote_hls_gstreamer`.<br>
 Default choice is an RTSP video stream.
 #### VIDEO_INPUTS_PARAMS
 | Item      | Description |
 | --------- | -----|
-| file  | Name and location of the video file. |
+| file  | Name and location of the picture. (It must be a .jpg or .png file) |
+| movie | Name and location of the video file. |
 | usbcam  | The GStreamer pipeline connecting the ALPR to an USB camera. |
 | raspberrycam | The GStreamer pipeline connecting the ALPR to an Raspberry Pi camera (MIPI). |
 | remote_cam | The GStreamer pipeline connecting the ALPR to an RTSP source. |
