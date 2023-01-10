@@ -50,12 +50,12 @@ void draw_boxes(cv::Mat& bgr, vector<bbox_t> result_vec, vector<string> obj_name
 //----------------------------------------------------------------------------------------
 void show_result(vector<bbox_t> const result_vec, vector<string> const obj_names)
 {
-    cout << " " << endl;
 	for (auto &i : result_vec) {
 		if (obj_names.size() > i.obj_id) cout << obj_names[i.obj_id] << " - ";
 		cout << setprecision(3) << "prob = " << i.prob << ",  x = " << i.x << ", y = " << i.y
 			<< ", w = " << i.w << ", h = " << i.h << endl;
 	}
+    cout << " " << endl;
 }
 //----------------------------------------------------------------------------------------
 vector<string> objects_names_from_file(string const filename)
@@ -230,7 +230,9 @@ int main()
         return -1;
     }
 
-   cout << "ALPR Version : " << Js.Version << endl;
+    cout << "ALPR Version : " << Js.Version << endl;
+
+    RTSPcam cam(Js.Gstr);   //you can dump anything OpenCV eats. (cv::CAP_ANY)
 
 	Detector CarNet(Js.Cstr+".cfg", Js.Cstr+".weights");
 	auto CarNames = objects_names_from_file(Js.Cstr+".names");
@@ -240,8 +242,6 @@ int main()
 
 	Detector OcrNet(Js.Ostr+".cfg", Js.Ostr+".weights");
 	auto OcrNames = objects_names_from_file(Js.Ostr+".names");
-
-    RTSPcam cam(Js.Gstr);   //you can dump anything OpenCV eats. (cv::CAP_ANY)
 
     while (true)
 	{
@@ -285,8 +285,14 @@ int main()
             }
             //show frame
             cv::imshow("RTSP stream",frame);
-            char esc = cv::waitKey(5);
-            if(esc == 27) break;
+            if(cam.Picture){
+                char esc = cv::waitKey();       //in case of a static picture wait infinitive
+                if(esc == 27) break;
+            }
+            else{
+                char esc = cv::waitKey(5);
+                if(esc == 27) break;
+            }
 
 		}
 		catch (exception &e) { cerr << "exception: " << e.what() << "\n"; getchar(); }
