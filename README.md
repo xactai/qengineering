@@ -162,7 +162,7 @@ Default choice is an RTSP video stream.
 #### VIDEO_INPUTS_PARAMS
 | Item      | Description |
 | --------- | -----|
-| file  | Name and location of the picture. (It must be a .jpg or .png file) |
+| file  | Name and location of the picture. It must be a jpg or png file. |
 | movie | Name and location of the video file. |
 | usbcam  | The GStreamer pipeline connecting the ALPR to an USB camera. |
 | raspberrycam | The GStreamer pipeline connecting the ALPR to an Raspberry Pi camera (MIPI). |
