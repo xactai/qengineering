@@ -55,6 +55,10 @@ bool Tjson::GetSettings(void)
         if(!GetSetting("LICENSE_MODEL",Lstr)) return Success;
         if(!GetSetting("OCR_MODEL",Ostr))     return Success;
         if(!GetSetting("PRINT_ON",PrintOn))   return Success;
+        if(!GetSetting("HEURISTIC_ON",HeuristicsOn))   return Success;
+        if(!GetSetting("THRESHOLD_CAR",ThresCar))   return Success;
+        if(!GetSetting("THRESHOLD_PLATE",ThresPlate))   return Success;
+        if(!GetSetting("THRESHOLD_OCR",ThresOCR))   return Success;
 
         //so far, so good
         Success=true;
@@ -98,6 +102,23 @@ bool Tjson::GetSetting(const std::string Key,bool& Value)
 }
 //----------------------------------------------------------------------------------------
 bool Tjson::GetSetting(const std::string Key,int& Value)
+{
+    bool Success=false;
+
+    if(Jvalid){
+        try{
+            Value = j.at(Key);
+            Success=true;
+        }
+        catch( ... ){
+            std::cout << "Error reading value of "<< Key <<" in json file!" << std::endl;
+        }
+    }
+
+    return Success;
+}
+//----------------------------------------------------------------------------------------
+bool Tjson::GetSetting(const std::string Key,double& Value)
 {
     bool Success=false;
 

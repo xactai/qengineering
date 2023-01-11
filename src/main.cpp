@@ -251,7 +251,7 @@ int main()
                 break;
             }
             //detect the cars
-            vector<bbox_t> result_car = CarNet.detect(frame,0.25);
+            vector<bbox_t> result_car = CarNet.detect(frame,Js.ThresCar);
             Wd = frame.cols;    Ht = frame.rows;
             //loop through the found cars / motorbikes
             for (auto &i : result_car) {
@@ -262,7 +262,7 @@ int main()
                         //Create the ROI
                         cv::Mat frame_car = frame(roi);
                         //detect plates
-                        vector<bbox_t> result_plate = PlateNet.detect(frame_car,0.05);
+                        vector<bbox_t> result_plate = PlateNet.detect(frame_car,Js.ThresPlate);
                         Wd = frame_car.cols;    Ht = frame_car.rows;
                         //loop through the found lisence plates
                         for (auto &j : result_plate) {
@@ -272,11 +272,15 @@ int main()
                                 //Create the ROI
                                 cv::Mat frame_plate = frame_car(roi);
                                 //detect plates
-                                vector<bbox_t> result_ocr = OcrNet.detect(frame_plate,0.66);
+                                vector<bbox_t> result_ocr = OcrNet.detect(frame_plate,Js.ThresOCR);
                                 //heuristics
-                                SortPlate(result_ocr);
+                                if(Js.HeuristicsOn){
+                                    SortPlate(result_ocr);
+                                }
                                 //show
-                                if(Js.PrintOn) show_result(result_ocr, OcrNames);
+                                if(Js.PrintOn){
+                                    show_result(result_ocr, OcrNames);
+                                }
                                 draw_boxes(frame, result_ocr, OcrNames, roi, i.x, i.y);
                                 send_json_http(result_ocr, OcrNames, ++FrmCnt);
                             }
