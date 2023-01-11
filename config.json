@@ -12,5 +12,9 @@
   "VEHICLE_MODEL": "./models/vehicle-detection",
   "LICENSE_MODEL": "./models/lp-detection-layout-classification",
   "OCR_MODEL": "./models/lp-recognition",
-  "PRINT_ON": true
+  "PRINT_ON": true,
+  "HEURISTIC_ON": true,
+  "THRESHOLD_CAR": 0.25,
+  "THRESHOLD_PLATE": 0.05,
+  "THRESHOLD_OCR": 0.66
 }
