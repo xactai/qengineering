@@ -243,9 +243,8 @@ int main()
 	Detector OcrNet(Js.Ostr+".cfg", Js.Ostr+".weights");
 	auto OcrNames = objects_names_from_file(Js.Ostr+".names");
 
-    while (true)
-	{
-		try {
+    while (true) {
+	try {
             if(!cam.GetLatestFrame(frame)){
                 cout<<"Capture read error"<<endl;
                 break;
