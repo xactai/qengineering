@@ -153,7 +153,11 @@ All required settings are listed in the `config.json` file. Without this file, t
   "VEHICLE_MODEL": "./models/vehicle-detection",
   "LICENSE_MODEL": "./models/lp-detection-layout-classification",
   "OCR_MODEL": "./models/lp-recognition",
-  "PRINT_ON": true
+  "PRINT_ON": true,
+  "HEURISTIC_ON": true,
+  "THRESHOLD_CAR": 0.25,
+  "THRESHOLD_PLATE": 0.05,
+  "THRESHOLD_OCR": 0.66  
 }
 ```
 #### VIDEO_INPUT
@@ -176,6 +180,10 @@ Each set constist of three files. The topology (.cfg) file, the weights (.weight
 #### PRINT_ON
 When the boolean PRINT_ON is `true`, license plates are printed on the terminal.<br>
 When `false`, the license plates are still detected and sent as JSON string to local port 8070, but are not shown on the terminal window.
+#### HEURISTIC_ON
+When the boolean HEURISTIC_ON is `true`, the characters found are sorted on position and doubles are removed.
+#### THRESHOLD_
+The threshold appied to the darknet model mentioned
 
 ------------
 
