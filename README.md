@@ -56,7 +56,7 @@ Start with some evergreens
 ```
 $ sudo apt-get update 
 $ sudo apt-get upgrade
-$ sudo apt-get install curl libcurl4
+$ sudo apt-get install curl libcurl3
 $ sudo apt-get install cmake wget
 ```
 #### Node.js
