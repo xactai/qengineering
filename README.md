@@ -58,6 +58,7 @@ $ sudo apt-get update
 $ sudo apt-get upgrade
 $ sudo apt-get install curl libcurl3
 $ sudo apt-get install cmake wget
+$ sudo apt-get install libcanberra-gtk*
 ```
 #### Node.js
 ```
