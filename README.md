@@ -132,6 +132,7 @@ Your *MyDir* folder must now look like this: <br/>
 │   ├── Regression.cpp
 │   ├── RTSPcam.cpp
 │   └── Tjson.cpp
+├── CMakeLists.txt
 ├── config.json
 └── YOLO_ALPR.cbp
 ```
@@ -190,4 +191,20 @@ The threshold appied to the darknet model mentioned
 
 ## Running the app.
 Before compiling and running the application, modify the config.json to your situation.<br>
-Once done, load the project file YOLO_ALPR.cbp in Code::Blocks and run `<F9>`. More info follow the instructions at [Hands-On](https://qengineering.eu/deep-learning-examples-on-raspberry-32-64-os.html#HandsOn).<br/>
+Once done, you have two options.<br>
+#### CMake
+The first option is using CMake. Please follow the next commands
+```
+$ cd *MyDir* <br/>
+$ mkdir build
+$ cd build
+$ cmake ..
+$ make
+```
+Find your ALPR app in *MyDir*<br> 
+![Screenshot from 2023-01-19 11-45-24](https://user-images.githubusercontent.com/44409029/213423986-ddc29d2b-92b4-4b5b-9ca7-e3067ed4308d.png)<br>
+![image](https://user-images.githubusercontent.com/44409029/213424180-46621c1b-92e5-4a87-9fb1-95c071b4f0a8.png)<br>
+#### Code::Blocks
+The second option is using Code::Blocks, an GNU C++ IDE.<br>
+Load the project file YOLO_ALPR.cbp in Code::Blocks and run `<F9>`.<br>
+More info follow the instructions at [Hands-On](https://qengineering.eu/deep-learning-examples-on-raspberry-32-64-os.html#HandsOn).<br/>
