@@ -13,6 +13,7 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-g" />
+					<Add directory="include" />
 				</Compiler>
 			</Target>
 			<Target title="Release">
@@ -22,6 +23,7 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-O3" />
+					<Add directory="include" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -54,9 +56,11 @@
 			<Add option="-rdynamic" />
 			<Add library="/usr/local/lib/libdarknet.so" />
 		</Linker>
+		<Unit filename="include/MJPG_sender.h" />
 		<Unit filename="include/RTSPcam.h" />
 		<Unit filename="include/Regression.h" />
 		<Unit filename="include/Tjson.h" />
+		<Unit filename="src/MJPG_sender.cpp" />
 		<Unit filename="src/RTSPcam.cpp" />
 		<Unit filename="src/Regression.cpp" />
 		<Unit filename="src/Tjson.cpp" />
