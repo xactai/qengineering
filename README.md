@@ -123,11 +123,16 @@ Your *MyDir* folder must now look like this: <br/>
 │   ├── vehicle-detection.names
 │   └── vehicle-detection.weights
 ├── include
+│   ├── darkunistd.h
+│   ├── http_stream.h
+│   ├── MJPG_sender.h
 │   ├── Numbers.h
 │   ├── Regression.h
 │   ├── RTSPcam.h
 │   └── Tjson.h
 ├── src
+│   ├── http_stream.cpp
+│   ├── MJPG_sender.cpp
 │   ├── main.cpp
 │   ├── Regression.cpp
 │   ├── RTSPcam.cpp
