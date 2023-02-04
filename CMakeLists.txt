@@ -14,7 +14,7 @@ endmacro(use_cxx11)
 
 find_package(OpenCV REQUIRED)                              
 
-set(SOURCES src/main.cpp src/RTSPcam.cpp src/Regression.cpp src/Tjson.cpp)
+set(SOURCES src/main.cpp src/RTSPcam.cpp src/Regression.cpp src/Tjson.cpp src/MJPG_sender.cpp src/Regression.cpp)
 
 set(EXTRA_LIBS ${OpenCV_LIBS} /usr/local/lib/libdarknet.so)
 
