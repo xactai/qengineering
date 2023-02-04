@@ -11,6 +11,7 @@
 #include "RTSPcam.h"
 #include "Regression.h"
 #include "Tjson.h"
+#include "MJPG_sender.h"
 
 using namespace std;
 
@@ -20,7 +21,22 @@ using namespace std;
 Tjson Js;
 
 //----------------------------------------------------------------------------------------
-void draw_boxes(cv::Mat& bgr, vector<bbox_t> result_vec, vector<string> obj_names, cv::Rect roi, int off_x, int off_y)
+void draw_vehicle(cv::Mat& bgr, bbox_t& v)
+{
+    //Create the rectangle
+    cv::Rect roi(v.x+Js.RoiCrop.x, v.y+Js.RoiCrop.y, v.w, v.h);
+    if(v.obj_id == 0) cv::rectangle(bgr, roi, cv::Scalar(255, 255,   0),2); //cyan - car
+    else              cv::rectangle(bgr, roi, cv::Scalar(255,   0, 255),2); //magenta - motorcycle
+}
+//----------------------------------------------------------------------------------------
+void draw_plate(cv::Mat& bgr, bbox_t& v, bbox_t& p)
+{
+    //Create the rectangle
+    cv::Rect roi(p.x+v.x+Js.RoiCrop.x, p.y+v.y+Js.RoiCrop.y, p.w, p.h);
+    cv::rectangle(bgr, roi, cv::Scalar(0, 255, 0),2); //green - plate
+}
+//----------------------------------------------------------------------------------------
+void draw_ocr(cv::Mat& bgr, bbox_t& v, bbox_t& p, vector<bbox_t> result_vec, vector<string> obj_names)
 {
     char text[32];
     size_t i;
@@ -28,17 +44,15 @@ void draw_boxes(cv::Mat& bgr, vector<bbox_t> result_vec, vector<string> obj_name
 
     if(result_vec.size()==0) return;
 
-	for(i=0;(i<result_vec.size() && i<32);i++){
+    for(i=0;(i<result_vec.size() && i<32);i++){
         text[i]=obj_names[result_vec[i].obj_id][0];
-	}
-	text[i]=0; //closing (0=endl);
-
-    cv::rectangle(bgr, cv::Rect(roi.x+off_x, roi.y+off_y, roi.width, roi.height), cv::Scalar(0, 255, 0),2);
+    }
+    text[i]=0; //closing (0=endl);
 
     cv::Size label_size = cv::getTextSize(text, cv::FONT_HERSHEY_SIMPLEX, 0.5, 1, &baseLine);
 
-    int x = off_x + roi.x;
-    int y = off_y + roi.y - label_size.height - baseLine;
+    int x = p.x+v.x+Js.RoiCrop.x;
+    int y = p.y+v.y+Js.RoiCrop.y - label_size.height - baseLine;
     if (y < 0) y = 0;
     if (x + label_size.width > bgr.cols)  x = bgr.cols - label_size.width;
 
@@ -48,7 +62,7 @@ void draw_boxes(cv::Mat& bgr, vector<bbox_t> result_vec, vector<string> obj_name
     cv::putText(bgr, text, cv::Point(x, y + label_size.height), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 0));
 }
 //----------------------------------------------------------------------------------------
-void show_result(vector<bbox_t> const result_vec, vector<string> const obj_names)
+void print_result(vector<bbox_t> const result_vec, vector<string> const obj_names)
 {
 	for (auto &i : result_vec) {
 		if (obj_names.size() > i.obj_id) cout << obj_names[i.obj_id] << " - ";
@@ -74,19 +88,13 @@ vector<string> objects_names_from_file(string const filename)
 //----------------------------------------------------------------------------------------
 //note, SortSingleLine can erase elements from cur_bbox_vec
 //that way shorten the length of the vector. Hence size_t& bnd
-void SortSingleLine(vector<bbox_t>& cur_bbox_vec, size_t StartPos, size_t& StopPos)
+void SortSingleLine(vector<bbox_t>& cur_bbox_vec, float ch_wd, float ch_ht, size_t StartPos, size_t& StopPos)
 {
     size_t i, j;
-    float ch_wd, ch_ht;
     bbox_t tmp_box;
     int d, i1, i2;
 
-    //get average width and height of the characters
-    for(ch_ht=ch_wd=0.0, i=StartPos; i<StopPos; i++){
-        ch_wd+=cur_bbox_vec[i].w;
-        ch_ht+=cur_bbox_vec[i].h;
-    }
-    ch_wd/=(StopPos-StartPos); ch_ht/=(StopPos-StartPos);
+    if((StopPos-StartPos)<=1) return;
 
     //sort by x position
     for(i=StartPos; i<StopPos; i++){
@@ -121,7 +129,7 @@ void SortPlate(vector<bbox_t>& cur_bbox_vec)
     double A, B, R;
     TLinRegression LinReg;
 
-    if(len==0) return;
+    if(len < 2) return;         //no need to investigate 1 character
 
     //get average width and height of the characters
     for(ch_ht=ch_wd=0.0, i=0; i<len; i++){
@@ -130,18 +138,23 @@ void SortPlate(vector<bbox_t>& cur_bbox_vec)
     }
     ch_wd/=len; ch_ht/=len;
 
-    //get linear regression through all (x,y)
-    for(i=0; i<len; i++){
-        LinReg.Add(cur_bbox_vec[i].x, cur_bbox_vec[i].y);
-    }
-    LinReg.Execute(A,B,R);
-    //now you can do a warp perspective if the skew is too large.
-    //in that case, you have to run the ocr detection again.
-    //here we see how well a single line fits all the characters.
-    //if the standard deviation is high, you have one line of text
-    //if the R is low, you have a two line number plate.
+    if(len > 4){
+        //get linear regression through all (x,y)
+        for(i=0; i<len; i++){
+            LinReg.Add(cur_bbox_vec[i].x, cur_bbox_vec[i].y);
+        }
+        LinReg.Execute(A,B,R);
+        //now you can do a warp perspective if the skew is too large.
+        //in that case, you have to run the ocr detection again.
+        //here we see how well a single line fits all the characters.
+        //if the standard deviation is high, you have one line of text
+        //if the R is low, you have a two line number plate.
 
-//    cout << "A = " << A << "  B = " << B << "  R = " << R << endl;
+    //    cout << "A = " << A << "  B = " << B << "  R = " << R << endl;
+    }
+    else{
+        R=1.0;  // with 4 or less characters, assume we got always one line.
+    }
 
     if( R < 0.25 ){
         //two lines -> sort on y first
@@ -162,30 +175,45 @@ void SortPlate(vector<bbox_t>& cur_bbox_vec)
             if(j>n){ n=j; bnd=i+1; }
         }
         //sort the first line 0 < bnd
-        SortSingleLine(cur_bbox_vec, 0, bnd);
+        SortSingleLine(cur_bbox_vec, ch_wd, ch_ht, 0, bnd);
 
         len=cur_bbox_vec.size();        //SortSingleLine can shorten the length of the vector
         //sort the second line bnd < len
-        SortSingleLine(cur_bbox_vec, bnd, len);
+        SortSingleLine(cur_bbox_vec, ch_wd, ch_ht, bnd, len);
     }
     else{
         //one line -> sort by x position
-        SortSingleLine(cur_bbox_vec, 0, len);
+        SortSingleLine(cur_bbox_vec, ch_wd, ch_ht, 0, len);
     }
 
 
 }
 //----------------------------------------------------------------------------------------
-bool send_json_http(vector<bbox_t> cur_bbox_vec, vector<string> obj_names, int frame_id,
+static std::mutex mtx_mjpeg;
+
+void send_mjpeg(cv::Mat& mat, int port, int timeout, int quality)
+{
+    try {
+        std::lock_guard<std::mutex> lock(mtx_mjpeg);
+        static MJPG_sender wri(port, timeout, quality);
+
+        wri.write(mat);
+    }
+    catch (...) {
+        cerr << " Error in send_mjpeg() function \n";
+    }
+}
+//----------------------------------------------------------------------------------------
+bool send_json_http(vector<bbox_t> cur_bbox_vec, vector<string> obj_names, string frame_id,
                     string filename = string(), int timeout = 400000, int port = 8070){
     string send_str;
 
     char *tmp_buf = (char *)calloc(1024, sizeof(char));
     if (!filename.empty()) {
-        sprintf(tmp_buf, "{\n \"frame_id\":%d, \n \"filename\":\"%s\", \n \"objects\": [ \n", frame_id, filename.c_str());
+        sprintf(tmp_buf, "{\n \"frame_id\":%s, \n \"filename\":\"%s\", \n \"objects\": [ \n", frame_id.c_str(), filename.c_str());
     }
     else {
-        sprintf(tmp_buf, "{\n \"frame_id\":%d, \n \"objects\": [ \n", frame_id);
+        sprintf(tmp_buf, "{\n \"frame_id\":%s, \n \"objects\": [ \n", frame_id.c_str());
     }
     send_str = tmp_buf;
     free(tmp_buf);
@@ -211,16 +239,53 @@ bool send_json_http(vector<bbox_t> cur_bbox_vec, vector<string> obj_names, int f
 
     send_str += "\n ] \n}";
 
+    if(Js.Json_Folder!="none"){
+        ofstream Jfile(Js.Json_Folder+"/"+frame_id);
+        Jfile << send_str;
+        Jfile.close();
+    }
+
     send_json_custom(send_str.c_str(), port, timeout);
     return true;
+}
+//----------------------------------------------------------------------------------------
+void CropMat(cv::Mat& In, cv::Mat& Out) //checks the RoI parameters on forehand
+{
+    cv::Rect R;
+
+    if(Js.RoiCrop.width  <= In.cols) R.width  = Js.RoiCrop.width;
+    else                             R.width  = In.cols;
+
+    if(Js.RoiCrop.height <= In.rows) R.height = Js.RoiCrop.height;
+    else                             R.height = In.rows;
+
+    if(Js.RoiCrop.x < 0 ) R.x=0;
+    else{
+        if((Js.RoiCrop.x+R.width) <= In.cols) R.x=Js.RoiCrop.x;
+        else                                  R.x=In.cols-R.width;
+    }
+
+    if(Js.RoiCrop.y < 0 ) R.y=0;
+    else{
+        if((Js.RoiCrop.y+R.height) <= In.rows) R.y=Js.RoiCrop.y;
+        else                                   R.y=In.rows-R.height;
+    }
+
+    Out = In(R);
+    //important update the Js.RoiCrop as it is used as offset in the remaining code.
+    //in fact you may overrule the config.json here.
+    Js.RoiCrop = R;
 }
 //----------------------------------------------------------------------------------------
 int main()
 {
     bool Success;
+    char ChrCar, ChrPlate;
     unsigned int Wd, Ht;
-    int FrmCnt = 0;
     cv::Mat frame;
+    cv::Mat frame_full;
+    cv::Mat frame_full_render;
+    RTSPcam cam;
 
     //Js takes care for printing errors.
     Js.LoadFromFile("./config.json");
@@ -232,7 +297,8 @@ int main()
 
     cout << "ALPR Version : " << Js.Version << endl;
 
-    RTSPcam cam(Js.Gstr);   //you can dump anything OpenCV eats. (cv::CAP_ANY)
+    //see if we must make some output directories.
+    Js.MakeFolders();
 
 	Detector CarNet(Js.Cstr+".cfg", Js.Cstr+".weights");
 	auto CarNames = objects_names_from_file(Js.Cstr+".names");
@@ -243,63 +309,117 @@ int main()
 	Detector OcrNet(Js.Ostr+".cfg", Js.Ostr+".weights");
 	auto OcrNames = objects_names_from_file(Js.Ostr+".names");
 
+    cam.Open(Js.Gstr);   //you can dump anything OpenCV eats. (cv::CAP_ANY)
+
     while (true) {
-	try {
-            if(!cam.GetLatestFrame(frame)){
+        try {
+            if(!cam.GetLatestFrame(frame_full)){
                 cout<<"Capture read error"<<endl;
                 break;
             }
+            //store the frame_full only if directory name is valid
+            //note it stores a MASSIVE bulk of pictures on your disk!
+            if(Js.FoI_Folder!="none"){
+                cv::imwrite( Js.FoI_Folder+"/"+cam.CurrentFileName+"_utc.png", frame_full);
+            }
+
+            //crop and copy the frame
+            frame_full_render = frame_full.clone();
+            CropMat(frame_full,frame);
+            //draw crop borders
+            cv::rectangle(frame_full_render, Js.RoiCrop, cv::Scalar(0, 128, 255),2);
+
             //detect the cars
             vector<bbox_t> result_car = CarNet.detect(frame,Js.ThresCar);
-            Wd = frame.cols;    Ht = frame.rows;
+
             //loop through the found cars / motorbikes
+            Wd = frame.cols;  Ht = frame.rows; ChrCar='a';
             for (auto &i : result_car) {
+                //a known issue; the whole image is selected as an object -> skip this result
+                if((100*i.w>(85*Wd)) || (100*i.h>(85*Ht))) continue;    //stay in the integer domain
+
                 //Create the rectangle
                 if((i.w > 40) && (i.h > 40) &&    //get some width and height (40x40)
                    ((i.x + i.w) < Wd) && ((i.y + i.h) < Ht)){
                         cv::Rect roi(i.x, i.y, i.w, i.h);
                         //Create the ROI
                         cv::Mat frame_car = frame(roi);
+
+                        //draw borders around cars / motorbikes
+                        draw_vehicle(frame_full_render, i);
+                        //store the car only if directory name is valid
+                        if(Js.Car_Folder!="none"){
+                            cv::imwrite( Js.Car_Folder+"/"+cam.CurrentFileName+"_"+ChrCar+"_utc.png", frame_car);
+                            ChrCar++;
+                        }
+
                         //detect plates
                         vector<bbox_t> result_plate = PlateNet.detect(frame_car,Js.ThresPlate);
-                        Wd = frame_car.cols;    Ht = frame_car.rows;
+
                         //loop through the found lisence plates
+                        Wd = frame_car.cols;  Ht = frame_car.rows; ChrPlate='1';
                         for (auto &j : result_plate) {
                             if((j.w > 20) && (j.h > 10) &&    //get some width and height (20x10)
                                ((j.x + 2 + j.w) < Wd) && ((j.y + 2 + j.h) < Ht)){
-                                cv::Rect roi(j.x, j.y+1, j.w+2, j.h+2);
+                                cv::Rect roi(j.x, j.y, j.w+2, j.h+2);
                                 //Create the ROI
                                 cv::Mat frame_plate = frame_car(roi);
+
+                                //draw borders around plates
+                                draw_plate(frame_full_render, i, j);
+                                //store the car only if directory name is valid
+                                if(Js.Plate_Folder!="none"){
+                                    cv::imwrite( Js.Plate_Folder+"/"+cam.CurrentFileName+"_"+ChrCar+"_"+ChrPlate+"_utc.png", frame_plate);
+                                    ChrPlate++;
+                                }
+
                                 //detect plates
                                 vector<bbox_t> result_ocr = OcrNet.detect(frame_plate,Js.ThresOCR);
+
                                 //heuristics
                                 if(Js.HeuristicsOn){
                                     SortPlate(result_ocr);
                                 }
+
                                 //show
-                                if(Js.PrintOn){
-                                    show_result(result_ocr, OcrNames);
+                                if(Js.PrintOnCli){
+                                    print_result(result_ocr, OcrNames);
                                 }
-                                draw_boxes(frame, result_ocr, OcrNames, roi, i.x, i.y);
-                                send_json_http(result_ocr, OcrNames, ++FrmCnt);
-                            }
-                     }
+                                //draw borders around plates
+                                draw_ocr(frame_full_render, i, j, result_ocr, OcrNames);
+                                //send json into the world (port 8070)
+                                send_json_http(result_ocr, OcrNames, cam.CurrentFileName+"_"+ChrCar+"_"+ChrPlate+"_utc.json");
+                        }
+                    }
+                }
+                //store the frame_full only if directory name is valid
+                //note it stores a MASSIVE bulk of pictures on your disk!
+                if(Js.Render_Folder!="none"){
+                    cv::imwrite( Js.Render_Folder+"/"+cam.CurrentFileName+"_utc.png", frame_full_render);
                 }
             }
-            //show frame
-            cv::imshow("RTSP stream",frame);
-            if(cam.Picture){
-                char esc = cv::waitKey();       //in case of a static picture wait infinitive
-                if(esc == 27) break;
-            }
-            else{
-                char esc = cv::waitKey(5);
-                if(esc == 27) break;
-            }
 
-		}
-		catch (exception &e) { cerr << "exception: " << e.what() << "\n"; getchar(); }
-		catch (...) { cerr << "unknown exception \n"; getchar(); }
+            //send the frame to port 8090
+            if(Js.MJPEG_Port > 0) send_mjpeg(frame, Js.MJPEG_Port, 500000, 70);
+
+            //print frame
+            cout << "CurrentFileName : "<< cam.CurrentFileName << endl;
+
+            //show frame
+            if(Js.PrintOnRender){
+                cv::imshow("RTSP stream",frame_full_render);
+                if(cam.UsePicture){
+                    char esc = cv::waitKey();       //in case of a static picture wait infinitive
+                    if(esc == 27) break;
+                }
+                else{
+                    char esc = cv::waitKey(5);
+                    if(esc == 27) break;
+                }
+            }
+        }
+        catch (exception &e) { cerr << "exception: " << e.what() << "\n"; getchar(); }
+        catch (...) { cerr << "unknown exception \n"; getchar(); }
 	}
 	return 0;
 }
