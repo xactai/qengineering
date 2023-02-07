@@ -25,8 +25,6 @@
   "LICENSE_MODEL": "./models/lp-detection-layout-classification",
   "OCR_MODEL": "./models/lp-recognition",
 
-  "HEURISTIC_ON": false,
-
   "PRINT_ON_CLI": true,
   "PRINT_ON_RENDER": true,
 
@@ -37,6 +35,7 @@
   "RENDERS_FOLDER": "none",
 
   "HEURISTIC_ON": true,
+
   "THRESHOLD_VERHICLE": 0.25,
   "THRESHOLD_PLATE": 0.01,
   "THRESHOLD_OCR": 0.5
