@@ -148,23 +148,45 @@ All required settings are listed in the `config.json` file. Without this file, t
 ```json
 {
   "VERSION": "1.0.0",
-  "VIDEO_INPUT": "remote_cam",
+  "VIDEO_INPUT": "CCTV",
   "VIDEO_INPUTS_PARAMS": {
-    "file": "./car12.jpg",
-    "movie": "./demo.mp4",
+    "image": "./images/4.jpg",
+    "folder": "./inputs/images",
+    "video": "./images/demo.mp4",
     "usbcam": "v4l2src device=/dev/video0 ! video/x-raw, framerate=30/1, width=640, height=360 ! videoconvert ! appsink",
-    "raspberrycam": "nvarguscamerasrc ! video/x-raw(memory:NVMM),width=1280, height=720, framerate=30/1, format=NV12 ! nvvidconv ! video/x-raw, format=BGRx, width=640, height=360 ! videoconvert ! video/x-raw, format=BGR ! appsink",
-    "remote_cam": "rtsp://192.168.178.129:8554/test/",
+    "CSI1": "nvarguscamerasrc sensor_id=0 ! video/x-raw(memory:NVMM),width=640, height=480, framerate=15/1, format=NV12 ! nvvidconv ! video/x-raw, format=BGRx, width=640, height=480 ! videoconvert ! video/x-raw, format=BGR ! appsink",
+    "CSI2": "nvarguscamerasrc sensor_id=1 ! video/x-raw(memory:NVMM),width=640, height=480, framerate=15/1, format=NV12 ! nvvidconv ! video/x-raw, format=BGRx, width=640, height=480 ! videoconvert ! video/x-raw, format=BGR ! appsink",
+    "CCTV": "rtsp://192.168.178.129:8554/test/",
     "remote_hls_gstreamer": "souphttpsrc location=http://YOUR_HLSSTREAM_URL_HERE.m3u8 ! hlsdemux ! decodebin ! videoconvert ! videoscale ! appsink"
   },
+
+  "RoI": {
+    "x_offset": 220,
+    "y_offset": 500,
+    "width": 640,
+    "height": 480
+  },
+
+  "MJPEG_PORT": 8090,
+
   "VEHICLE_MODEL": "./models/vehicle-detection",
   "LICENSE_MODEL": "./models/lp-detection-layout-classification",
   "OCR_MODEL": "./models/lp-recognition",
-  "PRINT_ON": true,
+
+  "PRINT_ON_CLI": true,
+  "PRINT_ON_RENDER": true,
+
+  "FoI_FOLDER": "none",
+  "VEHICLES_FOLDER": "none",
+  "PLATES_FOLDER": "none",
+  "JSONS_FOLDER": "./outputs/jsons",
+  "RENDERS_FOLDER": "none",
+
   "HEURISTIC_ON": true,
-  "THRESHOLD_CAR": 0.25,
-  "THRESHOLD_PLATE": 0.05,
-  "THRESHOLD_OCR": 0.66  
+
+  "THRESHOLD_VERHICLE": 0.25,
+  "THRESHOLD_PLATE": 0.01,
+  "THRESHOLD_OCR": 0.5
 }
 ```
 #### VIDEO_INPUT
@@ -174,12 +196,19 @@ Default choice is an RTSP video stream.
 #### VIDEO_INPUTS_PARAMS
 | Item      | Description |
 | --------- | -----|
-| file  | Name and location of the picture. It must be a jpg or png file. |
-| movie | Name and location of the video file. |
+| image  | Name and location of the picture. It must be a jpg or png file. |
+| folder  | Directory containing the pictures. They must be jpg or png. |
+| video | Name and location of the video file. |
 | usbcam  | The GStreamer pipeline connecting the ALPR to an USB camera. |
-| raspberrycam | The GStreamer pipeline connecting the ALPR to an Raspberry Pi camera (MIPI). |
-| remote_cam | The GStreamer pipeline connecting the ALPR to an RTSP source. |
+| CSI1 | The GStreamer pipeline connecting the ALPR to an MIPI camera (port 0). |
+| CSI2 | The GStreamer pipeline connecting the ALPR to an MIPI camera (port 1). |
+| CCTV | The GStreamer pipeline connecting the ALPR to an RTSP source. |
 | remote_hls_gstreamer | The GStreamer pipeline connecting the ALPR to an HLS source. |
+#### RoI
+The coordinates of the cropped image that will be analyzed. All parameters are checked in advance.<br>
+At run time, they can be modified if necessary to avoid crashes. The size and height take precedence over the x and y offset.
+#### MJPEG_PORT
+The port number of the local host to which the video is streamed.
 #### MODEL
 The name and location where the darknet deep learning models can be found.<br>
 You need three sets: one for detecting the vehicle, one for detecting a license plate and one for optical character recognition.<br>
