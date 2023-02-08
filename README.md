@@ -209,13 +209,23 @@ The coordinates of the cropped image that will be analyzed. All parameters are c
 At run time, they can be modified if necessary to avoid crashes. The size and height take precedence over the x and y offset.
 #### MJPEG_PORT
 The port number of the local host to which the video is streamed.
-#### MODEL
+#### _MODEL
 The name and location where the darknet deep learning models can be found.<br>
 You need three sets: one for detecting the vehicle, one for detecting a license plate and one for optical character recognition.<br>
 Each set constist of three files. The topology (.cfg) file, the weights (.weights) file and the labels (.names).
-#### PRINT_ON
-When the boolean PRINT_ON is `true`, license plates are printed on the terminal.<br>
+#### PRINT_ON_CLI
+When the boolean PRINT_ON_CLI is `true`, license plates are printed on the terminal.<br>
 When `false`, the license plates are still detected and sent as JSON string to local port 8070, but are not shown on the terminal window.
+#### PRINT_ON_RENDER
+When the boolean PRINT_ON_RENDER is `true`, vehicles, license plates and OCR outcomes are drawn into the output window.
+#### _FOLDER
+Locations where debug images are stored. When the folder name is `none` the storage is inhibited.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;`FoI_FOLDER`: Every frame being analysed.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;`VEHICLES_FOLDER`: Every vehicle found.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;`PLATES_FOLDER`: Every lisence plate found.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;`JSONS_FOLDER`: OCR json files.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;`RENDERS_FOLDER`: Frames shown with boxes around found items.<br><br>
+:point_right:&nbsp;&nbsp;Note that the amount of data stored can be _**huge**_! Within a few minutes, the SD card can be completely written.
 #### HEURISTIC_ON
 When the boolean HEURISTIC_ON is `true`, the characters found are sorted on position and doubles are removed.
 #### THRESHOLD_
