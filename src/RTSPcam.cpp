@@ -5,6 +5,8 @@
 //----------------------------------------------------------------------------------------
 #include "RTSPcam.h"
 #include <sys/stat.h>
+#include <iostream>
+#include <string>
 
 #define DUMMY 35
 #define COUNT 35
@@ -38,11 +40,25 @@ void RTSPcam::Open(const string& MyString, int apiPreference)
 {
     struct stat s;
     MyFile = MyString;
+    string Ext;
+
+    UsePicture = false;
+    UseFolder  = false;                 // true when a only folder name is loaded.
 
     if(stat(MyString.c_str(),&s)==0){
         if(s.st_mode & S_IFREG){
-            UsePicture = true;
-            cout << "Open picture : " << MyFile << endl;
+            Ext=MyString.substr(MyString.find_last_of(".") + 1);
+            std::transform(Ext.begin(), Ext.end(), Ext.begin(),[](unsigned char c){ return std::tolower(c); });
+            if(Ext=="bmp" || Ext=="jpg" || Ext=="png" ){
+                UsePicture = true;
+                cout << "Open picture : " << MyFile << endl;
+            }
+            else{
+                //video file
+                cout << "Open movie : " << MyFile << endl;
+                cap->open(MyString, apiPreference);
+                ProcessOpen();
+            }
             return;
         }
         else{
