@@ -282,6 +282,7 @@ int main()
     bool Success;
     char ChrCar, ChrPlate;
     unsigned int Wd, Ht;
+    unsigned int WdC, HtC;
     cv::Mat frame;
     cv::Mat frame_full;
     cv::Mat frame_full_render;
@@ -336,8 +337,7 @@ int main()
             Wd = frame.cols;  Ht = frame.rows; ChrCar='a';
             for (auto &i : result_car) {
                 //a known issue; the whole image is selected as an object -> skip this result
-                if((100*i.w>(85*Wd)) || (100*i.h>(85*Ht))) continue;    //stay in the integer domain
-
+                if((100*i.w>(95*Wd)) || (100*i.h>(95*Ht))) continue;    //stay in the integer domain
                 //Create the rectangle
                 if((i.w > 40) && (i.h > 40) &&    //get some width and height (40x40)
                    ((i.x + i.w) < Wd) && ((i.y + i.h) < Ht)){
@@ -347,6 +347,7 @@ int main()
 
                         //draw borders around cars / motorbikes
                         draw_vehicle(frame_full_render, i);
+
                         //store the car only if directory name is valid
                         if(Js.Car_Folder!="none"){
                             cv::imwrite( Js.Car_Folder+"/"+cam.CurrentFileName+"_"+ChrCar+"_utc.png", frame_car);
@@ -357,10 +358,11 @@ int main()
                         vector<bbox_t> result_plate = PlateNet.detect(frame_car,Js.ThresPlate);
 
                         //loop through the found lisence plates
-                        Wd = frame_car.cols;  Ht = frame_car.rows; ChrPlate='1';
+                        WdC = frame_car.cols;  HtC = frame_car.rows; ChrPlate='1';
                         for (auto &j : result_plate) {
+                            WdC = frame_car.cols;  HtC = frame_car.rows;
                             if((j.w > 20) && (j.h > 10) &&    //get some width and height (20x10)
-                               ((j.x + 2 + j.w) < Wd) && ((j.y + 2 + j.h) < Ht)){
+                               ((j.x + 2 + j.w) < WdC) && ((j.y + 2 + j.h) < HtC)){
                                 cv::Rect roi(j.x, j.y, j.w+2, j.h+2);
                                 //Create the ROI
                                 cv::Mat frame_plate = frame_car(roi);
