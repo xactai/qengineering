@@ -168,6 +168,8 @@ All required settings are listed in the `config.json` file. Without this file, t
   },
 
   "MJPEG_PORT": 8090,
+  "MJPEG_WIDTH": 320,
+  "MJPEG_HEIGHT": 240,
 
   "VEHICLE_MODEL": "./models/vehicle-detection",
   "LICENSE_MODEL": "./models/lp-detection-layout-classification",
