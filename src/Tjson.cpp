@@ -68,6 +68,8 @@ bool Tjson::GetSettings(void)
         if(!GetSetting(j,"JSONS_FOLDER",Json_Folder))      return Success;
         if(!GetSetting(j,"RENDERS_FOLDER",Render_Folder))  return Success;
         if(!GetSetting(j,"MJPEG_PORT",MJPEG_Port))         return Success;
+        if(!GetSetting(j,"MJPEG_WIDTH",MJPEG_Width))       return Success;
+        if(!GetSetting(j,"MJPEG_HEIGHT",MJPEG_Height))     return Success;
 
         //crop sizes
         if(!GetSetting(j["RoI"],"x_offset",RoiCrop.x))     return Success;

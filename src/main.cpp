@@ -280,13 +280,15 @@ void CropMat(cv::Mat& In, cv::Mat& Out) //checks the RoI parameters on forehand
 int main()
 {
     bool Success;
-    char ChrCar, ChrPlate;
+    char ChrCar='a';
+    char ChrPlate='1';
     unsigned int Wd, Ht;
     unsigned int WdC, HtC;
     cv::Mat frame;
     cv::Mat frame_full;
     cv::Mat frame_full_render;
     RTSPcam cam;
+    vector<bbox_t> result_ocr;
 
     //Js takes care for printing errors.
     Js.LoadFromFile("./config.json");
@@ -376,7 +378,7 @@ int main()
                                 }
 
                                 //detect plates
-                                vector<bbox_t> result_ocr = OcrNet.detect(frame_plate,Js.ThresOCR);
+                                result_ocr = OcrNet.detect(frame_plate,Js.ThresOCR);
 
                                 //heuristics
                                 if(Js.HeuristicsOn){
@@ -389,8 +391,6 @@ int main()
                                 }
                                 //draw borders around plates
                                 draw_ocr(frame_full_render, i, j, result_ocr, OcrNames);
-                                //send json into the world (port 8070)
-                                send_json_http(result_ocr, OcrNames, cam.CurrentFileName+"_"+ChrCar+"_"+ChrPlate+"_utc.json");
                         }
                     }
                 }
@@ -401,8 +401,15 @@ int main()
                 }
             }
 
+            //send json into the world (port 8070)
+            send_json_http(result_ocr, OcrNames, cam.CurrentFileName+"_"+ChrCar+"_"+ChrPlate+"_utc.json");
+
             //send the frame to port 8090
-            if(Js.MJPEG_Port > 0) send_mjpeg(frame, Js.MJPEG_Port, 500000, 70);
+            if(Js.MJPEG_Port > 0){
+                cv::Mat frame_resize(Js.MJPEG_Height, Js.MJPEG_Width, CV_8UC3);
+                cv::resize(frame_full_render,frame_resize,frame_resize.size(),0,0);
+                send_mjpeg(frame_resize, Js.MJPEG_Port, 500000, 70);
+            }
 
             //print frame
             cout << "CurrentFileName : "<< cam.CurrentFileName << endl;
