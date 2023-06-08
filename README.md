@@ -211,6 +211,8 @@ The coordinates of the cropped image that will be analyzed. All parameters are c
 At run time, they can be modified if necessary to avoid crashes. The size and height take precedence over the x and y offset.
 #### MJPEG_PORT
 The port number of the local host to which the video is streamed.
+#### MJPEG_WIDTH MJPEG_HEIGHT
+The image size send to the local host.
 #### _MODEL
 The name and location where the darknet deep learning models can be found.<br>
 You need three sets: one for detecting the vehicle, one for detecting a license plate and one for optical character recognition.<br>
