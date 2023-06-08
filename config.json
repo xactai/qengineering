@@ -1,8 +1,8 @@
 {
   "VERSION": "1.0.0",
-  "VIDEO_INPUT": "CCTV",
+  "VIDEO_INPUT": "video",
   "VIDEO_INPUTS_PARAMS": {
-    "image": "./images/4.jpg",
+    "image": "./images/car.jpg",
     "folder": "./inputs/images",
     "video": "./images/demo.mp4",
     "usbcam": "v4l2src device=/dev/video0 ! video/x-raw, framerate=30/1, width=640, height=360 ! videoconvert ! appsink",
@@ -13,17 +13,21 @@
   },
 
   "RoI": {
-    "x_offset": 220,
-    "y_offset": 500,
-    "width": 640,
-    "height": 480
+    "x_offset": 0,
+    "y_offset": 0,
+    "width": 2280,
+    "height": 1080
   },
 
   "MJPEG_PORT": 8090,
+  "MJPEG_WIDTH": 320,
+  "MJPEG_HEIGHT": 240,
 
   "VEHICLE_MODEL": "./models/vehicle-detection",
   "LICENSE_MODEL": "./models/lp-detection-layout-classification",
   "OCR_MODEL": "./models/lp-recognition",
+
+  "HEURISTIC_ON": false,
 
   "PRINT_ON_CLI": true,
   "PRINT_ON_RENDER": true,
@@ -35,8 +39,7 @@
   "RENDERS_FOLDER": "none",
 
   "HEURISTIC_ON": true,
-
-  "THRESHOLD_VERHICLE": 0.25,
+  "THRESHOLD_VERHICLE": 0.01,
   "THRESHOLD_PLATE": 0.01,
   "THRESHOLD_OCR": 0.5
 }
