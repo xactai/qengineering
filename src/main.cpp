@@ -125,11 +125,22 @@ void SortPlate(vector<bbox_t>& cur_bbox_vec)
     size_t i, j, n, bnd;
     size_t len=cur_bbox_vec.size();
     bbox_t tmp_box;
-    float ch_wd, ch_ht;
+    float prb,ch_wd, ch_ht;
     double A, B, R;
     TLinRegression LinReg;
 
     if(len < 2) return;         //no need to investigate 1 character
+
+    //check nr of chars
+    while(len > 10){
+        //get the lowest probability
+        for(prb=1000.0, i=0;i<len;i++){
+            if(cur_bbox_vec[i].prob < prb){ prb=cur_bbox_vec[i].prob; n=i;}
+        }
+        //delete the lowest
+        cur_bbox_vec.erase(cur_bbox_vec.begin()+n);
+        len=cur_bbox_vec.size();
+    }
 
     //get average width and height of the characters
     for(ch_ht=ch_wd=0.0, i=0; i<len; i++){
@@ -150,7 +161,7 @@ void SortPlate(vector<bbox_t>& cur_bbox_vec)
         //if the standard deviation is high, you have one line of text
         //if the R is low, you have a two line number plate.
 
-    //    cout << "A = " << A << "  B = " << B << "  R = " << R << endl;
+        cout << "A = " << A << "  B = " << B << "  R = " << R << endl;
     }
     else{
         R=1.0;  // with 4 or less characters, assume we got always one line.
@@ -185,8 +196,6 @@ void SortPlate(vector<bbox_t>& cur_bbox_vec)
         //one line -> sort by x position
         SortSingleLine(cur_bbox_vec, ch_wd, ch_ht, 0, len);
     }
-
-
 }
 //----------------------------------------------------------------------------------------
 static std::mutex mtx_mjpeg;
@@ -318,86 +327,89 @@ int main()
         try {
             if(!cam.GetLatestFrame(frame_full)){
                 cout<<"Capture read error"<<endl;
-                break;
+//                break;
             }
-            //store the frame_full only if directory name is valid
-            //note it stores a MASSIVE bulk of pictures on your disk!
-            if(Js.FoI_Folder!="none"){
-                cv::imwrite( Js.FoI_Folder+"/"+cam.CurrentFileName+"_utc.png", frame_full);
-            }
-
-            //crop and copy the frame
-            frame_full_render = frame_full.clone();
-            CropMat(frame_full,frame);
-            //draw crop borders
-            cv::rectangle(frame_full_render, Js.RoiCrop, cv::Scalar(0, 128, 255),2);
-
-            //detect the cars
-            vector<bbox_t> result_car = CarNet.detect(frame,Js.ThresCar);
-
-            //loop through the found cars / motorbikes
-            Wd = frame.cols;  Ht = frame.rows; ChrCar='a';
-            for (auto &i : result_car) {
-                //a known issue; the whole image is selected as an object -> skip this result
-                if((100*i.w>(95*Wd)) || (100*i.h>(95*Ht))) continue;    //stay in the integer domain
-                //Create the rectangle
-                if((i.w > 40) && (i.h > 40) &&    //get some width and height (40x40)
-                   ((i.x + i.w) < Wd) && ((i.y + i.h) < Ht)){
-                        cv::Rect roi(i.x, i.y, i.w, i.h);
-                        //Create the ROI
-                        cv::Mat frame_car = frame(roi);
-
-                        //draw borders around cars / motorbikes
-                        draw_vehicle(frame_full_render, i);
-
-                        //store the car only if directory name is valid
-                        if(Js.Car_Folder!="none"){
-                            cv::imwrite( Js.Car_Folder+"/"+cam.CurrentFileName+"_"+ChrCar+"_utc.png", frame_car);
-                            ChrCar++;
-                        }
-
-                        //detect plates
-                        vector<bbox_t> result_plate = PlateNet.detect(frame_car,Js.ThresPlate);
-
-                        //loop through the found lisence plates
-                        WdC = frame_car.cols;  HtC = frame_car.rows; ChrPlate='1';
-                        for (auto &j : result_plate) {
-                            WdC = frame_car.cols;  HtC = frame_car.rows;
-                            if((j.w > 20) && (j.h > 10) &&    //get some width and height (20x10)
-                               ((j.x + 2 + j.w) < WdC) && ((j.y + 2 + j.h) < HtC)){
-                                cv::Rect roi(j.x, j.y, j.w+2, j.h+2);
-                                //Create the ROI
-                                cv::Mat frame_plate = frame_car(roi);
-
-                                //draw borders around plates
-                                draw_plate(frame_full_render, i, j);
-                                //store the car only if directory name is valid
-                                if(Js.Plate_Folder!="none"){
-                                    cv::imwrite( Js.Plate_Folder+"/"+cam.CurrentFileName+"_"+ChrCar+"_"+ChrPlate+"_utc.png", frame_plate);
-                                    ChrPlate++;
-                                }
-
-                                //detect plates
-                                result_ocr = OcrNet.detect(frame_plate,Js.ThresOCR);
-
-                                //heuristics
-                                if(Js.HeuristicsOn){
-                                    SortPlate(result_ocr);
-                                }
-
-                                //show
-                                if(Js.PrintOnCli){
-                                    print_result(result_ocr, OcrNames);
-                                }
-                                //draw borders around plates
-                                draw_ocr(frame_full_render, i, j, result_ocr, OcrNames);
-                        }
-                    }
-                }
+            else{
                 //store the frame_full only if directory name is valid
                 //note it stores a MASSIVE bulk of pictures on your disk!
-                if(Js.Render_Folder!="none"){
-                    cv::imwrite( Js.Render_Folder+"/"+cam.CurrentFileName+"_utc.png", frame_full_render);
+                if(Js.FoI_Folder!="none"){
+                    cv::imwrite( Js.FoI_Folder+"/"+cam.CurrentFileName+"_utc.png", frame_full);
+                }
+
+                //crop and copy the frame
+                frame_full_render = frame_full.clone();
+                CropMat(frame_full,frame);
+                //draw crop borders
+                cv::rectangle(frame_full_render, Js.RoiCrop, cv::Scalar(0, 128, 255),2);
+
+                //detect the cars
+                vector<bbox_t> result_car = CarNet.detect(frame,Js.ThresCar);
+
+                //loop through the found cars / motorbikes
+                Wd = frame.cols;  Ht = frame.rows; ChrCar='a';
+                for (auto &i : result_car) {
+                    //a known issue; the whole image is selected as an object -> skip this result
+                    if((100*i.w>(95*Wd)) || (100*i.h>(95*Ht))) continue;    //stay in the integer domain
+                    //Create the rectangle
+                    if((i.w > 40) && (i.h > 40) &&    //get some width and height (40x40)
+                       ((i.x + i.w) < Wd) && ((i.y + i.h) < Ht)){
+                            cv::Rect roi(i.x, i.y, i.w, i.h);
+                            //Create the ROI
+                            cv::Mat frame_car = frame(roi);
+
+                            //draw borders around cars / motorbikes
+                            draw_vehicle(frame_full_render, i);
+
+                            //store the car only if directory name is valid
+                            if(Js.Car_Folder!="none"){
+                                cv::imwrite( Js.Car_Folder+"/"+cam.CurrentFileName+"_"+ChrCar+"_utc.png", frame_car);
+                                ChrCar++;
+                            }
+
+                            //detect plates
+                            vector<bbox_t> result_plate = PlateNet.detect(frame_car,Js.ThresPlate);
+
+                            //loop through the found lisence plates
+                            WdC = frame_car.cols;  HtC = frame_car.rows; ChrPlate='1';
+                            for (auto &j : result_plate) {
+                                WdC = frame_car.cols;  HtC = frame_car.rows;
+                                if((j.w > 20) && (j.h > 10) &&    //get some width and height (20x10)
+                                   ((j.x + 2 + j.w) < WdC) && ((j.y + 2 + j.h) < HtC)){
+                                    cv::Rect roi(j.x, j.y, j.w+2, j.h+2);
+                                    //Create the ROI
+    //                                cv::Mat frame_plate = frame_car(roi);
+                                    cv::Mat frame_plate = cv::imread("Plate2.png");
+
+                                    //draw borders around plates
+                                    draw_plate(frame_full_render, i, j);
+                                    //store the car only if directory name is valid
+                                    if(Js.Plate_Folder!="none"){
+                                        cv::imwrite( Js.Plate_Folder+"/"+cam.CurrentFileName+"_"+ChrCar+"_"+ChrPlate+"_utc.png", frame_plate);
+                                        ChrPlate++;
+                                    }
+
+                                    //detect plates
+                                    result_ocr = OcrNet.detect(frame_plate,Js.ThresOCR);
+
+                                    //heuristics
+                                    if(Js.HeuristicsOn){
+                                        SortPlate(result_ocr);
+                                    }
+
+                                    //show
+                                    if(Js.PrintOnCli){
+                                        print_result(result_ocr, OcrNames);
+                                    }
+                                    //draw borders around plates
+                                    draw_ocr(frame_full_render, i, j, result_ocr, OcrNames);
+                            }
+                        }
+                    }
+                    //store the frame_full only if directory name is valid
+                    //note it stores a MASSIVE bulk of pictures on your disk!
+                    if(Js.Render_Folder!="none"){
+                        cv::imwrite( Js.Render_Folder+"/"+cam.CurrentFileName+"_utc.png", frame_full_render);
+                    }
                 }
             }
 
