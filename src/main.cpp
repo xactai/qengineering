@@ -411,31 +411,31 @@ int main()
                         cv::imwrite( Js.Render_Folder+"/"+cam.CurrentFileName+"_utc.png", frame_full_render);
                     }
                 }
-            }
 
-            //send json into the world (port 8070)
-            send_json_http(result_ocr, OcrNames, cam.CurrentFileName+"_"+ChrCar+"_"+ChrPlate+"_utc.json");
+                //send json into the world (port 8070)
+                send_json_http(result_ocr, OcrNames, cam.CurrentFileName+"_"+ChrCar+"_"+ChrPlate+"_utc.json");
 
-            //send the frame to port 8090
-            if(Js.MJPEG_Port > 0){
-                cv::Mat frame_resize(Js.MJPEG_Height, Js.MJPEG_Width, CV_8UC3);
-                cv::resize(frame_full_render,frame_resize,frame_resize.size(),0,0);
-                send_mjpeg(frame_resize, Js.MJPEG_Port, 500000, 70);
-            }
-
-            //print frame
-            cout << "CurrentFileName : "<< cam.CurrentFileName << endl;
-
-            //show frame
-            if(Js.PrintOnRender){
-                cv::imshow("RTSP stream",frame_full_render);
-                if(cam.UsePicture){
-                    char esc = cv::waitKey();       //in case of a static picture wait infinitive
-                    if(esc == 27) break;
+                //send the frame to port 8090
+                if(Js.MJPEG_Port > 0){
+                    cv::Mat frame_resize(Js.MJPEG_Height, Js.MJPEG_Width, CV_8UC3);
+                    cv::resize(frame_full_render,frame_resize,frame_resize.size(),0,0);
+                    send_mjpeg(frame_resize, Js.MJPEG_Port, 500000, 70);
                 }
-                else{
-                    char esc = cv::waitKey(5);
-                    if(esc == 27) break;
+
+                //print frame
+                cout << "CurrentFileName : "<< cam.CurrentFileName << endl;
+
+                //show frame
+                if(Js.PrintOnRender){
+                    cv::imshow("RTSP stream",frame_full_render);
+                    if(cam.UsePicture){
+                        char esc = cv::waitKey();       //in case of a static picture wait infinitive
+                        if(esc == 27) break;
+                    }
+                    else{
+                        char esc = cv::waitKey(5);
+                        if(esc == 27) break;
+                    }
                 }
             }
         }
