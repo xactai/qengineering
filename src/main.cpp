@@ -330,12 +330,12 @@ int main()
 //                break;
             }
             else{
-                //store the frame_full only if directory name is valid
-                //note it stores a MASSIVE bulk of pictures on your disk!
-                if(Js.FoI_Folder!="none"){
-                    cv::imwrite( Js.FoI_Folder+"/"+cam.CurrentFileName+"_utc.png", frame_full);
-                }
                 if(!frame_full.empty()){
+                   //store the frame_full only if directory name is valid
+                   //note it stores a MASSIVE bulk of pictures on your disk!
+                   if(Js.FoI_Folder!="none"){
+                       cv::imwrite( Js.FoI_Folder+"/"+cam.CurrentFileName+"_utc.png", frame_full);
+                   }
                     //crop and copy the frame
                     frame_full_render = frame_full.clone();
                     CropMat(frame_full,frame);
