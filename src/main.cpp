@@ -335,106 +335,107 @@ int main()
                 if(Js.FoI_Folder!="none"){
                     cv::imwrite( Js.FoI_Folder+"/"+cam.CurrentFileName+"_utc.png", frame_full);
                 }
+                if(!frame_full.empty()){
+                    //crop and copy the frame
+                    frame_full_render = frame_full.clone();
+                    CropMat(frame_full,frame);
+                    //draw crop borders
+                    cv::rectangle(frame_full_render, Js.RoiCrop, cv::Scalar(0, 128, 255),2);
 
-                //crop and copy the frame
-                frame_full_render = frame_full.clone();
-                CropMat(frame_full,frame);
-                //draw crop borders
-                cv::rectangle(frame_full_render, Js.RoiCrop, cv::Scalar(0, 128, 255),2);
+                    //detect the cars
+                    vector<bbox_t> result_car = CarNet.detect(frame,Js.ThresCar);
 
-                //detect the cars
-                vector<bbox_t> result_car = CarNet.detect(frame,Js.ThresCar);
+                    //loop through the found cars / motorbikes
+                    Wd = frame.cols;  Ht = frame.rows; ChrCar='a';
+                    for (auto &i : result_car) {
+                        //a known issue; the whole image is selected as an object -> skip this result
+                        if((100*i.w>(95*Wd)) || (100*i.h>(95*Ht))) continue;    //stay in the integer domain
+                        //Create the rectangle
+                        if((i.w > 40) && (i.h > 40) &&    //get some width and height (40x40)
+                           ((i.x + i.w) < Wd) && ((i.y + i.h) < Ht)){
+                                cv::Rect roi(i.x, i.y, i.w, i.h);
+                                //Create the ROI
+                                cv::Mat frame_car = frame(roi);
 
-                //loop through the found cars / motorbikes
-                Wd = frame.cols;  Ht = frame.rows; ChrCar='a';
-                for (auto &i : result_car) {
-                    //a known issue; the whole image is selected as an object -> skip this result
-                    if((100*i.w>(95*Wd)) || (100*i.h>(95*Ht))) continue;    //stay in the integer domain
-                    //Create the rectangle
-                    if((i.w > 40) && (i.h > 40) &&    //get some width and height (40x40)
-                       ((i.x + i.w) < Wd) && ((i.y + i.h) < Ht)){
-                            cv::Rect roi(i.x, i.y, i.w, i.h);
-                            //Create the ROI
-                            cv::Mat frame_car = frame(roi);
+                                //draw borders around cars / motorbikes
+                                draw_vehicle(frame_full_render, i);
 
-                            //draw borders around cars / motorbikes
-                            draw_vehicle(frame_full_render, i);
+                                //store the car only if directory name is valid
+                                if(Js.Car_Folder!="none"){
+                                    cv::imwrite( Js.Car_Folder+"/"+cam.CurrentFileName+"_"+ChrCar+"_utc.png", frame_car);
+                                    ChrCar++;
+                                }
 
-                            //store the car only if directory name is valid
-                            if(Js.Car_Folder!="none"){
-                                cv::imwrite( Js.Car_Folder+"/"+cam.CurrentFileName+"_"+ChrCar+"_utc.png", frame_car);
-                                ChrCar++;
-                            }
+                                //detect plates
+                                vector<bbox_t> result_plate = PlateNet.detect(frame_car,Js.ThresPlate);
 
-                            //detect plates
-                            vector<bbox_t> result_plate = PlateNet.detect(frame_car,Js.ThresPlate);
+                                //loop through the found lisence plates
+                                WdC = frame_car.cols;  HtC = frame_car.rows; ChrPlate='1';
+                                for (auto &j : result_plate) {
+                                    WdC = frame_car.cols;  HtC = frame_car.rows;
+                                    if((j.w > 20) && (j.h > 10) &&    //get some width and height (20x10)
+                                       ((j.x + 2 + j.w) < WdC) && ((j.y + 2 + j.h) < HtC)){
+                                        cv::Rect roi(j.x, j.y, j.w+2, j.h+2);
+                                        //Create the ROI
+        //                                cv::Mat frame_plate = frame_car(roi);
+                                        cv::Mat frame_plate = cv::imread("Plate2.png");
 
-                            //loop through the found lisence plates
-                            WdC = frame_car.cols;  HtC = frame_car.rows; ChrPlate='1';
-                            for (auto &j : result_plate) {
-                                WdC = frame_car.cols;  HtC = frame_car.rows;
-                                if((j.w > 20) && (j.h > 10) &&    //get some width and height (20x10)
-                                   ((j.x + 2 + j.w) < WdC) && ((j.y + 2 + j.h) < HtC)){
-                                    cv::Rect roi(j.x, j.y, j.w+2, j.h+2);
-                                    //Create the ROI
-    //                                cv::Mat frame_plate = frame_car(roi);
-                                    cv::Mat frame_plate = cv::imread("Plate2.png");
+                                        //draw borders around plates
+                                        draw_plate(frame_full_render, i, j);
+                                        //store the car only if directory name is valid
+                                        if(Js.Plate_Folder!="none"){
+                                            cv::imwrite( Js.Plate_Folder+"/"+cam.CurrentFileName+"_"+ChrCar+"_"+ChrPlate+"_utc.png", frame_plate);
+                                            ChrPlate++;
+                                        }
 
-                                    //draw borders around plates
-                                    draw_plate(frame_full_render, i, j);
-                                    //store the car only if directory name is valid
-                                    if(Js.Plate_Folder!="none"){
-                                        cv::imwrite( Js.Plate_Folder+"/"+cam.CurrentFileName+"_"+ChrCar+"_"+ChrPlate+"_utc.png", frame_plate);
-                                        ChrPlate++;
-                                    }
+                                        //detect plates
+                                        result_ocr = OcrNet.detect(frame_plate,Js.ThresOCR);
 
-                                    //detect plates
-                                    result_ocr = OcrNet.detect(frame_plate,Js.ThresOCR);
+                                        //heuristics
+                                        if(Js.HeuristicsOn){
+                                            SortPlate(result_ocr);
+                                        }
 
-                                    //heuristics
-                                    if(Js.HeuristicsOn){
-                                        SortPlate(result_ocr);
-                                    }
-
-                                    //show
-                                    if(Js.PrintOnCli){
-                                        print_result(result_ocr, OcrNames);
-                                    }
-                                    //draw borders around plates
-                                    draw_ocr(frame_full_render, i, j, result_ocr, OcrNames);
+                                        //show
+                                        if(Js.PrintOnCli){
+                                            print_result(result_ocr, OcrNames);
+                                        }
+                                        //draw borders around plates
+                                        draw_ocr(frame_full_render, i, j, result_ocr, OcrNames);
+                                }
                             }
                         }
+                        //store the frame_full only if directory name is valid
+                        //note it stores a MASSIVE bulk of pictures on your disk!
+                        if(Js.Render_Folder!="none"){
+                            cv::imwrite( Js.Render_Folder+"/"+cam.CurrentFileName+"_utc.png", frame_full_render);
+                        }
                     }
-                    //store the frame_full only if directory name is valid
-                    //note it stores a MASSIVE bulk of pictures on your disk!
-                    if(Js.Render_Folder!="none"){
-                        cv::imwrite( Js.Render_Folder+"/"+cam.CurrentFileName+"_utc.png", frame_full_render);
+
+                    //send json into the world (port 8070)
+                    send_json_http(result_ocr, OcrNames, cam.CurrentFileName+"_"+ChrCar+"_"+ChrPlate+"_utc.json");
+
+                    //send the frame to port 8090
+                    if(Js.MJPEG_Port > 0){
+                        cv::Mat frame_resize(Js.MJPEG_Height, Js.MJPEG_Width, CV_8UC3);
+                        cv::resize(frame_full_render,frame_resize,frame_resize.size(),0,0);
+                        send_mjpeg(frame_resize, Js.MJPEG_Port, 500000, 70);
                     }
-                }
 
-                //send json into the world (port 8070)
-                send_json_http(result_ocr, OcrNames, cam.CurrentFileName+"_"+ChrCar+"_"+ChrPlate+"_utc.json");
+                    //print frame
+                    cout << "CurrentFileName : "<< cam.CurrentFileName << endl;
 
-                //send the frame to port 8090
-                if(Js.MJPEG_Port > 0){
-                    cv::Mat frame_resize(Js.MJPEG_Height, Js.MJPEG_Width, CV_8UC3);
-                    cv::resize(frame_full_render,frame_resize,frame_resize.size(),0,0);
-                    send_mjpeg(frame_resize, Js.MJPEG_Port, 500000, 70);
-                }
-
-                //print frame
-                cout << "CurrentFileName : "<< cam.CurrentFileName << endl;
-
-                //show frame
-                if(Js.PrintOnRender){
-                    cv::imshow("RTSP stream",frame_full_render);
-                    if(cam.UsePicture){
-                        char esc = cv::waitKey();       //in case of a static picture wait infinitive
-                        if(esc == 27) break;
-                    }
-                    else{
-                        char esc = cv::waitKey(5);
-                        if(esc == 27) break;
+                    //show frame
+                    if(Js.PrintOnRender){
+                        cv::imshow("RTSP stream",frame_full_render);
+                        if(cam.UsePicture){
+                            char esc = cv::waitKey();       //in case of a static picture wait infinitive
+                            if(esc == 27) break;
+                        }
+                        else{
+                            char esc = cv::waitKey(5);
+                            if(esc == 27) break;
+                        }
                     }
                 }
             }
