@@ -159,15 +159,15 @@ void SortPlate(vector<bbox_t>& cur_bbox_vec)
         //in that case, you have to run the ocr detection again.
         //here we see how well a single line fits all the characters.
         //if the standard deviation is high, you have one line of text
-        //if the R is low, you have a two line number plate.
+        //if the R is low, you have a two-line number plate.
 
-        cout << "A = " << A << "  B = " << B << "  R = " << R << endl;
+//        cout << "A = " << A << "  B = " << B << "  R = " << R << endl;
     }
     else{
-        R=1.0;  // with 4 or less characters, assume we got always one line.
+        R=1.0;  // with 4 or fewer characters, assume we got always one line.
     }
 
-    if( R < 0.25 ){
+    if( R < 0.08 ){
         //two lines -> sort on y first
         for(i=0; i<len; i++){
             for(j=i+1; j<len; j++){
@@ -180,7 +180,7 @@ void SortPlate(vector<bbox_t>& cur_bbox_vec)
             }
         }
 
-        //get the boundary between first and second line.
+        //get the boundary between the first and second line.
         for(n=0, i=0; i<len-1; i++){
             j=cur_bbox_vec[i+1].y-cur_bbox_vec[i].y;
             if(j>n){ n=j; bnd=i+1; }
@@ -299,7 +299,7 @@ int main()
     RTSPcam cam;
     vector<bbox_t> result_ocr;
 
-    //Js takes care for printing errors.
+    //Js takes care of printing errors.
     Js.LoadFromFile("./config.json");
 
     Success = Js.GetSettings();
@@ -331,7 +331,7 @@ int main()
             }
             else{
                 if(!frame_full.empty()){
-                    //store the frame_full only if directory name is valid
+                    //store the frame_full only if the directory name is valid
                     //note it stores a MASSIVE bulk of pictures on your disk!
                     if(Js.FoI_Folder!="none"){
                         cv::imwrite( Js.FoI_Folder+"/"+cam.CurrentFileName+"_utc.png", frame_full);
@@ -345,7 +345,7 @@ int main()
                     //detect the cars
                     vector<bbox_t> result_car = CarNet.detect(frame,Js.ThresCar);
 
-                    //loop through the found cars / motorbikes
+                    //loop through the found cars/motorbikes
                     Wd = frame.cols;  Ht = frame.rows; ChrCar='a';
                     for (auto &i : result_car) {
                         //a known issue; the whole image is selected as an object -> skip this result
@@ -357,10 +357,10 @@ int main()
                                 //Create the ROI
                                 cv::Mat frame_car = frame(roi);
 
-                                //draw borders around cars / motorbikes
+                                //draw borders around cars/motorbikes
                                 draw_vehicle(frame_full_render, i);
 
-                                //store the car only if directory name is valid
+                                //store the car only if the directory name is valid
                                 if(Js.Car_Folder!="none"){
                                     cv::imwrite( Js.Car_Folder+"/"+cam.CurrentFileName+"_"+ChrCar+"_utc.png", frame_car);
                                     ChrCar++;
@@ -369,7 +369,7 @@ int main()
                                 //detect plates
                                 vector<bbox_t> result_plate = PlateNet.detect(frame_car,Js.ThresPlate);
 
-                                //loop through the found lisence plates
+                                //loop through the found license plates
                                 WdC = frame_car.cols;  HtC = frame_car.rows; ChrPlate='1';
                                 for (auto &j : result_plate) {
                                     WdC = frame_car.cols;  HtC = frame_car.rows;
@@ -377,12 +377,11 @@ int main()
                                        ((j.x + 2 + j.w) < WdC) && ((j.y + 2 + j.h) < HtC)){
                                         cv::Rect roi(j.x, j.y, j.w+2, j.h+2);
                                         //Create the ROI
-        //                                cv::Mat frame_plate = frame_car(roi);
-                                        cv::Mat frame_plate = cv::imread("Plate2.png");
+                                        cv::Mat frame_plate = frame_car(roi);
 
                                         //draw borders around plates
                                         draw_plate(frame_full_render, i, j);
-                                        //store the car only if directory name is valid
+                                        //store the car only if the directory name is valid
                                         if(Js.Plate_Folder!="none"){
                                             cv::imwrite( Js.Plate_Folder+"/"+cam.CurrentFileName+"_"+ChrCar+"_"+ChrPlate+"_utc.png", frame_plate);
                                             ChrPlate++;
@@ -405,7 +404,7 @@ int main()
                                 }
                             }
                         }
-                        //store the frame_full only if directory name is valid
+                        //store the frame_full only if the directory name is valid
                         //note it stores a MASSIVE bulk of pictures on your disk!
                         if(Js.Render_Folder!="none"){
                             cv::imwrite( Js.Render_Folder+"/"+cam.CurrentFileName+"_utc.png", frame_full_render);
