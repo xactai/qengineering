@@ -167,7 +167,7 @@ void SortPlate(vector<bbox_t>& cur_bbox_vec)
         R=1.0;  // with 4 or fewer characters, assume we got always one line.
     }
 
-    if( R < 0.08 ){
+    if(R<0.08 && A>-1.0 && A<1.0){
         //two lines -> sort on y first
         for(i=0; i<len; i++){
             for(j=i+1; j<len; j++){
