@@ -256,3 +256,5 @@ Find your ALPR app in *MyDir*<br>
 The second option is using Code::Blocks, an GNU C++ IDE.<br>
 Load the project file YOLO_ALPR.cbp in Code::Blocks and run `<F9>`.<br>
 More info follow the instructions at [Hands-On](https://qengineering.eu/deep-learning-examples-on-raspberry-32-64-os.html#HandsOn).<br/>
+
+Updating ReadME to check the contributor list in Github repo.
