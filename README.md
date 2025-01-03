@@ -96,7 +96,7 @@ Follow this [guide](https://qengineering.eu/install-opencv-4.5-on-jetson-nano.ht
 #### Darknet
 Follow this [guide](https://qengineering.eu/install-darknet-on-jetson-nano.html).
 #### Darknet models.
-Due to their large size, all darknet models are stored at Gdrive [ALPR_models.zip](https://drive.google.com/file/d/1UCQi0BwtzOgcblaIPGi_V0Yim2yXBHKI/view?usp=share_link).<br>
+Due to their large size, all darknet models are stored at Release V1.0 [ALPR_models.zip](https://github.com/xactai/ELI-ALPR/releases/tag/v1.0).<br>
 After downloading you can unzip and save the models in the appropriate folder.
 
 ------------
