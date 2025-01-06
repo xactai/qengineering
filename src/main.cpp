@@ -90,6 +90,8 @@ vector<string> objects_names_from_file(string const filename)
 //that way shorten the length of the vector. Hence size_t& bnd
 void SortSingleLine(vector<bbox_t>& cur_bbox_vec, float ch_wd, float ch_ht, size_t StartPos, size_t& StopPos)
 {
+    // Ensure StartPos and StopPos are within bounds
+    if (StartPos >= cur_bbox_vec.size() || StopPos > cur_bbox_vec.size() || StopPos <= StartPos) return;
     size_t i, j;
     bbox_t tmp_box;
     int d, i1, i2;
@@ -216,7 +218,7 @@ void send_mjpeg(cv::Mat& mat, int port, int timeout, int quality)
 bool send_json_http(vector<bbox_t> cur_bbox_vec, vector<string> obj_names, string frame_id,
                     string filename = string(), int timeout = 400000, int port = 8070){
     string send_str;
-
+    if (cur_bbox_vec.empty()) return false;  // Early return if no bounding boxes are detected
     char *tmp_buf = (char *)calloc(1024, sizeof(char));
     if (!filename.empty()) {
         sprintf(tmp_buf, "{\n \"frame_id\":%s, \n \"filename\":\"%s\", \n \"objects\": [ \n", frame_id.c_str(), filename.c_str());
@@ -326,8 +328,8 @@ int main()
     while (true) {
         try {
             if(!cam.GetLatestFrame(frame_full)){
-                cout<<"Capture read error"<<endl;
-//                break;
+                cout<<"Input stream is closed"<<endl;
+                break;
             }
             else{
                 if(!frame_full.empty()){
