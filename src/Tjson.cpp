@@ -59,7 +59,7 @@ bool Tjson::GetSettings(void)
         if(!GetSetting(j,"PRINT_ON_CLI",PrintOnCli))       return Success;
         if(!GetSetting(j,"PRINT_ON_RENDER",PrintOnRender)) return Success;
         if(!GetSetting(j,"HEURISTIC_ON",HeuristicsOn))     return Success;
-        if(!GetSetting(j,"THRESHOLD_VERHICLE",ThresCar))   return Success;
+        if(!GetSetting(j,"THRESHOLD_VEHICLE",ThresCar))   return Success;
         if(!GetSetting(j,"THRESHOLD_PLATE",ThresPlate))    return Success;
         if(!GetSetting(j,"THRESHOLD_OCR",ThresOCR))        return Success;
         if(!GetSetting(j,"FoI_FOLDER",FoI_Folder))         return Success;
