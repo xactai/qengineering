@@ -92,11 +92,53 @@ $ sudo make install
 $ sudo apt-get install codeblocks
 ```
 #### OpenCV
+```
+$ git clone --depth=1 https://github.com/opencv/opencv.git
+$ git clone --depth=1 https://github.com/opencv/opencv_contrib.git 
+$ cd ~/opencv
+$ mkdir build
+$ cd build
+$ cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr -D OPENCV_EXTRA_MODULES_PATH=~/opencv_contrib/modules -D EIGEN_INCLUDE_PATH=/usr/include/eigen3  -D WITH_OPENCL=OFF  -D WITH_CUDA=ON  -D CUDA_ARCH_BIN=7.5  -D CUDA_ARCH_PTX="sm_75"  -D WITH_CUDNN=ON  -D WITH_CUBLAS=ON  -D ENABLE_FAST_MATH=ON  -D CUDA_FAST_MATH=ON  -D OPENCV_DNN_CUDA=OFF   -D WITH_QT=OFF  -D WITH_OPENMP=ON  -D BUILD_TIFF=ON  -D WITH_FFMPEG=ON  -D WITH_GSTREAMER=ON  -D WITH_TBB=ON  -D BUILD_TBB=ON  -D BUILD_TESTS=OFF  -D WITH_EIGEN=ON  -D WITH_V4L=ON  -D WITH_LIBV4L=ON  -D WITH_PROTOBUF=ON  -D OPENCV_ENABLE_NONFREE=ON  -D INSTALL_C_EXAMPLES=OFF  -D INSTALL_PYTHON_EXAMPLES=OFF  -D PYTHON3_PACKAGES_PATH=/usr/lib/python3/dist-packages  -D OPENCV_GENERATE_PKGCONFIG=ON  -D BUILD_EXAMPLES=OFF .. 
+-Note:
+- Need to change the values of CUDA_ARCH_BIN & CUDA_ARCH_PTX. It depends on your GPU model.
+
+$ make -j4
+$ sudo rm -r /usr/include/opencv4/opencv2
+$ sudo make install
+- cleaning (frees 300 MB)
+$ make clean
+$ sudo apt-get update
+
+- To check whether Opencv is installed or not
+$ dpkg -l | grep libopencv
+```
 Follow this [guide](https://qengineering.eu/install-opencv-4.5-on-jetson-nano.html).
-#### Darknet
+#### Darknet Installation
+
+$ git clone https://github.com/AlexeyAB/darknet.git
+
+```bash
+- modify the Flags like OpenCV, CUDNN, GPU and change the compute arch value based on the device
+$ cd darknet/
+$ nano Makefile
+
+- Edit and configure “Makefile” to enable all required libraries 
+$ GPU=1 
+$ OPENCV=1 
+$ CUDNN=1 
+$ OPENMP=1
+
+- Execute the command “make” in the build_ directory 
+$ make
+
+- compile darknet with modifications
+$ make clean
+$ make -j8
+```
 Follow this [guide](https://qengineering.eu/install-darknet-on-jetson-nano.html).
+
 #### Darknet models.
-Due to their large size, all darknet models are stored at Release V1.0 [ALPR_models.zip](https://github.com/xactai/ELI-ALPR/releases/tag/v1.0).<br>
+Due to their large size, all darknet models are stored at Gdrive [ALPR_models.zip](https://drive.google.com/file/d/1UCQi0BwtzOgcblaIPGi_V0Yim2yXBHKI/view?usp=share_link).<br>
 After downloading you can unzip and save the models in the appropriate folder.
 
 ------------
@@ -105,7 +147,7 @@ After downloading you can unzip and save the models in the appropriate folder.
 To extract and run the network in Code::Blocks <br/>
 $ mkdir *MyDir* <br/>
 $ cd *MyDir* <br/>
-$ git clone https://github.com/xactai/qengineering-01.git <br/>
+$ git clone https://github.com/xactai/ELI-ALPR.git
 Your *MyDir* folder must now look like this: <br/> 
 ```
 .
@@ -148,15 +190,15 @@ All required settings are listed in the `config.json` file. Without this file, t
 ```json
 {
   "VERSION": "1.0.0",
-  "VIDEO_INPUT": "CCTV",
+  "VIDEO_INPUT": "video",
   "VIDEO_INPUTS_PARAMS": {
-    "image": "./images/4.jpg",
-    "folder": "./inputs/images",
-    "video": "./images/demo.mp4",
+    "image": "/home/xactai/Pictures/academic-sample-image.jpg",
+    "folder": "/home/xactai/Pictures/Academic+NovotelOUT-Images",
+    "video": "/home/xactai/Videos/Novotel_Entry_22-mins_H264.mp4",
     "usbcam": "v4l2src device=/dev/video0 ! video/x-raw, framerate=30/1, width=640, height=360 ! videoconvert ! appsink",
     "CSI1": "nvarguscamerasrc sensor_id=0 ! video/x-raw(memory:NVMM),width=640, height=480, framerate=15/1, format=NV12 ! nvvidconv ! video/x-raw, format=BGRx, width=640, height=480 ! videoconvert ! video/x-raw, format=BGR ! appsink",
     "CSI2": "nvarguscamerasrc sensor_id=1 ! video/x-raw(memory:NVMM),width=640, height=480, framerate=15/1, format=NV12 ! nvvidconv ! video/x-raw, format=BGRx, width=640, height=480 ! videoconvert ! video/x-raw, format=BGR ! appsink",
-    "CCTV": "rtsp://192.168.178.129:8554/test/",
+    "CCTV": "rtsp://admin:Admin@12345@192.168.30.171/cam/realmonitor?channel=1&subtype=0",
     "remote_hls_gstreamer": "souphttpsrc location=http://YOUR_HLSSTREAM_URL_HERE.m3u8 ! hlsdemux ! decodebin ! videoconvert ! videoscale ! appsink"
   },
 
@@ -175,6 +217,8 @@ All required settings are listed in the `config.json` file. Without this file, t
   "LICENSE_MODEL": "./models/lp-detection-layout-classification",
   "OCR_MODEL": "./models/lp-recognition",
 
+  "HEURISTIC_ON": false,
+
   "PRINT_ON_CLI": true,
   "PRINT_ON_RENDER": true,
 
@@ -184,9 +228,7 @@ All required settings are listed in the `config.json` file. Without this file, t
   "JSONS_FOLDER": "./outputs/jsons",
   "RENDERS_FOLDER": "none",
 
-  "HEURISTIC_ON": true,
-
-  "THRESHOLD_VERHICLE": 0.25,
+  "THRESHOLD_VEHICLE": 0.01,
   "THRESHOLD_PLATE": 0.01,
   "THRESHOLD_OCR": 0.5
 }
@@ -250,11 +292,14 @@ $ cmake ..
 $ make
 ```
 Find your ALPR app in *MyDir*<br> 
-![Screenshot from 2023-01-19 11-45-24](https://user-images.githubusercontent.com/44409029/213423986-ddc29d2b-92b4-4b5b-9ca7-e3067ed4308d.png)<br>
-![image](https://user-images.githubusercontent.com/44409029/213424180-46621c1b-92e5-4a87-9fb1-95c071b4f0a8.png)<br>
+![Installation steps](outputs/Images/Installation_steps_ELI_ALPR.png)
+![ELI-ALPR application](outputs/Images/ELI-ALPR_Succesfully_installed.png)
 #### Code::Blocks
 The second option is using Code::Blocks, an GNU C++ IDE.<br>
 Load the project file YOLO_ALPR.cbp in Code::Blocks and run `<F9>`.<br>
 More info follow the instructions at [Hands-On](https://qengineering.eu/deep-learning-examples-on-raspberry-32-64-os.html#HandsOn).<br/>
 
-Updating ReadME to check the contributor list in Github repo.
+
+###  Acknowledgments
+
+- OpenDataCam  https://github.com/opendatacam/opendatacam/blob/release-v3.0.2/README.md
