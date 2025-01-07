@@ -40,5 +40,7 @@ private:
     void NiceString(const size_t Cnt);
     void NiceString(const std::string Str);
     std::chrono::steady_clock::time_point Tgrab;
+    std::chrono::steady_clock::time_point lastFpsTime;
+    std::chrono::steady_clock::time_point startTime;
 };
 #endif // RTSPCAM_H

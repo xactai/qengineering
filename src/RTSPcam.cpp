@@ -7,18 +7,21 @@
 #include <sys/stat.h>
 #include <iostream>
 #include <string>
+#include <iomanip>
 
 #define DUMMY 35
 #define COUNT 35
 
 using namespace std;
 //----------------------------------------------------------------------------------------
-RTSPcam::RTSPcam(void): cap(NULL), FirstPic(true), FrameCnt(0)
+RTSPcam::RTSPcam(void): cap(NULL), FirstPic(true), FrameCnt(0),,frameCount(0), real_fps(0.0)
 {
     cap = new cv::VideoCapture;
     UsePicture = false;
     UseFolder  = false;                 // true when a only folder name is loaded.
     CurrentFileName = "";
+    lastFpsTime = chrono::steady_clock::now();
+    startTime = std::chrono::steady_clock::now();    // Set the start time of the video
 }
 //----------------------------------------------------------------------------------------
 RTSPcam::~RTSPcam()
@@ -174,6 +177,25 @@ bool RTSPcam::GetLatestFrame(cv::Mat& frame)
     }
     Success = cap->read(frame);
     Tgrab   = chrono::steady_clock::now();
+    chrono::steady_clock::time_point current_time = chrono::steady_clock::now();
+    chrono::duration<float> elapsed_time_since_start = current_time - startTime;
+
+    if (elapsed_time_since_start.count() >= 1.0f) {
+        real_fps = frameCount / elapsed_time_since_start.count();
+        startTime = current_time;
+        frameCount = 0;
+    } 
+    frameCount++; // Increment frame count for every frame
+
+    // Display FPS on the video frame
+    std::stringstream fpsText;
+    fpsText << "FPS: " << std::fixed << std::setprecision(2) << real_fps;
+
+    int baseline = 0;
+    cv::Size textSize = cv::getTextSize(fpsText.str(), cv::FONT_HERSHEY_SIMPLEX, 0.5, 1, &baseline);
+    int centerX = (frame.cols - textSize.width) / 2;
+    int centerY = textSize.height + 10;
+    cv::putText(frame, fpsText.str(), cv::Point(centerX, centerY), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(20, 0, 255), 2);
 
     FirstPic= false;
     FrameCnt++;
