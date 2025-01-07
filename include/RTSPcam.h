@@ -42,5 +42,7 @@ private:
     std::chrono::steady_clock::time_point Tgrab;
     std::chrono::steady_clock::time_point lastFpsTime;
     std::chrono::steady_clock::time_point startTime;
+    float real_fps;    
+    int frameCount;                        
 };
 #endif // RTSPCAM_H

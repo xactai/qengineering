@@ -14,7 +14,7 @@
 
 using namespace std;
 //----------------------------------------------------------------------------------------
-RTSPcam::RTSPcam(void): cap(NULL), FirstPic(true), FrameCnt(0),,frameCount(0), real_fps(0.0)
+RTSPcam::RTSPcam(void): cap(NULL), FirstPic(true), FrameCnt(0), frameCount(0), real_fps(0.0)
 {
     cap = new cv::VideoCapture;
     UsePicture = false;
